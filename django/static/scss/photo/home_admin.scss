@@ -1,0 +1,116 @@
+@import "../global_mixins";
+
+#Sections {
+  position: relative;
+
+  #ToggleEditing {
+    position: relative;
+
+    &:hover:after {
+      content: "Enable Editing";
+      font-size: 8pt;
+      border: solid 2px;
+      position: absolute;
+      background: white;
+      width: 90px;
+      left: 5px;
+      top: -22px;
+    }
+  }
+
+  #SaveSectionsChange {
+    position: absolute;
+    top: 0;
+    left: 30px;
+  }
+
+  #AddSection {
+    input[name="name"] {
+      width: 100px;
+    }
+    .fi {
+      margin-left: 5px;
+    }
+  }
+
+  .Section_Title {
+    overflow: auto;
+    .EditingIcons {
+      float: right;
+      .fi {
+        float: left;
+        margin-left: 12px;
+      }
+    }
+  }
+
+  .EditingTool {
+    display: none;
+  }
+
+  &.editing {
+    #ToggleEditing:hover:after {
+      content: "Cancel Editing";
+    }
+
+    .EditingTool {
+      display: inherit;
+    }
+  }
+}
+
+
+#EditEntries {
+  @include verticalCenterByPosition(true, false);
+  top: 15%;
+  width: 600px;
+  background-color: #FFFFFF;
+  border: solid 1px #AAAAAA;
+
+  #EditEntries_Add {
+    float: right;
+    margin-right: 5px;
+  }
+
+  #EditEntries_Head {
+    margin-bottom: 5px;
+    div {
+      margin-left: 5px;
+      margin-right: 5px;
+    }
+  }
+
+  .EditEntry {
+    margin: 5px 0;
+    > * {
+      margin-left: 5px;
+      margin-right: 5px;
+      &.EditEntry_UploadThumbnail {
+        margin-left: 0;
+      }
+    }
+  }
+
+  [name="title"] {
+    width: 100px;
+  }
+  [name="thumbnail"] {
+    width: 130px;
+  }
+  div.HoderForUpload,
+  input.EditEntry_UploadThumbnail {
+    width: 40px;
+  }
+  div.HoderForUpload {
+    height: 1px;
+  }
+  [name="target"] {
+    width: 260px;
+  }
+
+  #EditEntries_OK,
+  #EditEntries_Cancel {
+    float: right;
+    margin-left: 10px;
+  }
+}

@@ -1,0 +1,56 @@
+@import "../../../components/mixins";
+@import "../../../components/variables";
+
+.admin .HomePage {
+  &:not(.editing) .EditingTool {
+    display: none;
+  }
+
+  > .EditingTool {
+    margin-top: -20px;
+    margin-left: 12px;
+  }
+
+  .Section_Title {
+    overflow: auto;
+    .EditingTool {
+      float: right;
+    }
+  }
+
+  .Section {
+    &.is-dragging,
+    .Entry.is-dragging {
+      > * {
+        opacity: 0.4;
+      }
+      outline: 1px dashed $color-border;
+    }
+  }
+}
+
+
+.entry-editor {
+  .setting-row {
+    display: flex;
+    padding-right: 80px;;
+
+    .setting-title {
+      box-sizing: border-box;
+      width: 80px;
+      padding-right: 10px;
+      line-height: 48px;
+      text-align: right;
+    }
+
+    .setting-input {
+      flex-grow: 1;
+    }
+
+    .overwrite-checkbox {
+      width: auto !important;
+      white-space: nowrap;
+      margin-left: 30px;
+    }
+  }
+}

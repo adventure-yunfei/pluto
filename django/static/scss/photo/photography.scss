@@ -1,0 +1,17 @@
+#Photography_Title {
+  text-align: center;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+#Photography_Content {
+  white-space: pre;
+
+  img {
+    max-width: 800px;
+    max-height: 800px;
+    display: block;
+    margin: auto;
+    margin-top: 80px;
+  }
+}

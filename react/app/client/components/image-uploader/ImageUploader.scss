@@ -1,0 +1,37 @@
+@import "../variables";
+@import "../mixins";
+
+.image-uploader {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  width: 100px;
+  height: 100px;
+  background: center/cover no-repeat;
+  border: 1px dashed $color-border;
+
+  .material-icons {
+    @include center-align(true, false);
+    top: 15px;
+    width: auto;
+    height: auto;
+    color: black;
+    font-size: 40px;
+  }
+
+  .upload-text-tip {
+    margin-top: 60px;
+    text-align: center;
+  }
+
+  input[type="file"] {
+    display: none;
+  }
+
+  &.img-uploaded {
+    .material-icons,
+    .upload-text-tip {
+      display: none;
+    }
+  }
+}

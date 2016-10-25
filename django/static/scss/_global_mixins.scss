@@ -1,0 +1,50 @@
+@charset "utf-8";
+
+@mixin CSS3($property, $value) {
+  -webkit-#{$property}: $value; // Chrome, Safari
+  -moz-#{$property}: $value;    // Firefox
+  -ms-#{$property}: $value;     // IE
+  -o-#{$property}: $value;      // Opera
+  #{$property}: $value;
+}
+
+@mixin CSS3Value($property, $value) {
+  #{$property}: -webkit-#{$value}; // Chrome, Safari
+  #{$property}: -moz-#{$value};    // Firefox
+  #{$property}: -ms-#{$value};     // IE
+  #{$property}: -o-#{$value};      // Opera
+  #{$property}: $value;
+}
+
+@mixin keyframes ($name) {
+  @keyframes #{$name} {
+    @content
+  }
+  @-webkit-keyframes #{$name} {
+    @content
+  }
+  @-moz-keyframes #{$name} {
+    @content
+  }
+  @-o-keyframes #{$name} {
+    @content
+  }
+}
+
+/**用定位+transform的方式实现居中
+   使用right/bottom定位而非top/left，因在IE下超出右下边界后将显示滚动条，即使设transform将元素移回视区内；
+   而超出左上边界时浏览器不会显示滚动条 */
+@mixin verticalCenterByPosition($isHorizon: true, $isVertical: true, $position: absolute) {
+  $translateX: 0;
+  $translateY: 0;
+  position: $position;
+  @if $isHorizon {
+    right: 50%;
+    $translateX: 50%;
+  }
+  @if $isVertical {
+    bottom: 50%;
+    $translateY: 50%;
+  }
+  @include CSS3(transform, translate(#{$translateX}, #{$translateY}));
+}

@@ -1,0 +1,24 @@
+.Photography {
+  .loading-tip {
+    display: block !important;
+    margin: 100px auto !important;
+  }
+
+  .photography-title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 20px;
+  }
+
+  .photography-content {
+    white-space: pre;
+
+    img {
+      max-width: 800px;
+      max-height: 800px;
+      display: block;
+      margin: auto;
+      margin-top: 80px;
+    }
+  }
+}

@@ -1,0 +1,128 @@
+@import '../global_mixins';
+
+$score-height : 20px;
+$score-margin-bottom : 10px;
+
+#game2048 {
+  position: relative;
+
+  #score {
+    height: $score-height;
+    margin-bottom: $score-margin-bottom;
+  }
+
+  .square {
+    width: 100px;
+    height: 100px;
+    box-sizing: border-box;
+    border: 2px solid;
+  }
+
+  .backgroundContainer {
+    .square {
+      background: orange;
+    }
+  }
+
+  .squaresContainer {
+    position: absolute;
+    top: $score-height + $score-margin-bottom;
+    left: 0;
+
+    .square {
+      position: absolute;
+      background: greenyellow;
+      line-height: 100px;
+      text-align: center;
+      font-size: 45px;
+      color: #776e65;
+
+      &.changingTop {
+        @include CSS3(transition-property, top);
+      }
+      &.changingLeft {
+        @include CSS3(transition-property, left);
+      }
+
+      z-index: 1;
+      &.directDisappear {
+        z-index: 0;
+      }
+
+      $duration: 200ms;
+      @include CSS3(transition-duration, $duration);
+      &.noTransition {
+        @include CSS3(transition-duration, 0);
+      }
+
+      @include CSS3(animation-duration, $duration);
+      &.bounceIn {
+        @include CSS3(animation-duration, 1s);
+      }
+      &.pulse {
+        @include CSS3(animation-duration, 300ms);
+      }
+
+      &.num2 {
+        background: #eee4da;
+      }
+      &.num4 {
+        background: #ede0c8;
+      }
+      &.num8 {
+        color: #f9f6f2;
+        background: #f2b179;
+      }
+      &.num16 {
+        color: #f9f6f2;
+        background: #f59563;
+      }
+      &.num32 {
+        color: #f9f6f2;
+        background: #f67c5f;
+      }
+      &.num64 {
+        color: #f9f6f2;
+        background: #f65e3b;
+      }
+      &.num128 {
+        color: #f9f6f2;
+        background: #edcf72;
+      }
+      &.num256 {
+        color: #f9f6f2;
+        background: #edcc61;
+      }
+      &.num512 {
+        color: #f9f6f2;
+        background: #edc850;
+      }
+      &.num1024 {
+        color: #f9f6f2;
+        background: #edc53f;
+      }
+      &.num2048 {
+        color: #f9f6f2;
+        background: #edc22e;
+      }
+    }
+  }
+}
+
+.Game2048_Player {
+    margin-top: 20px;
+
+}
+
+.directDisappear {
+  @include CSS3(animation-name, directDisappear);
+}
+
+@include keyframes(directDisappear) {
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}

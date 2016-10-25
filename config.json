@@ -1,0 +1,43 @@
+{
+  "__hosts": "每一项中, 'by_domain'指定域名访问方式, 'by_port'(如果有)指定端口访问方式, 'run_by_apache'指定由apache监听该端口",
+  "hosts": {
+    "entrance": {
+      "by_domain": "yunfei.me"
+    },
+    "static": {
+      "by_port": 12190,
+      "by_domain": "static.yunfei.me",
+      "run_by_apache": true
+    },
+    "django": {
+      "by_port": 12191,
+      "by_domain": "django.yunfei.me",
+      "run_by_apache": true
+    },
+    "gitblog": {
+      "by_port": 12192,
+      "by_domain": "blog.yunfei.me",
+      "run_by_apache": true
+    },
+    "react": {
+      "by_port": 12193,
+      "by_domain": "react.yunfei.me",
+      "run_by_apache": false
+    }
+  },
+
+  "__README__": "以下需要在部署环境手动指定",
+  "blog": {
+    "__README__": "移步配置文件: 'conf.yaml'",
+    "duoshuo": "",
+    "baiduAnalytics": ""
+  },
+  "django-photosite": {
+    "baidu-access-key": "",
+    "baidu-secret-key": "",
+    "baiduAnalytics": ""
+  },
+  "react-photosite": {
+    "baiduAnalytics": ""
+  }
+}

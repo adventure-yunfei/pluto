@@ -1,0 +1,22 @@
+@import "mixins";
+
+.flex-box {
+  display: flex;
+}
+
+.material-icons {
+  &.mi-add {
+    font-weight: bold;
+    color: $color-green;
+  }
+  &.mi-remove {
+    font-weight: bold;
+    color: $color-red;
+  }
+  &.mi-edit {
+    color: $color-yellow;
+  }
+  &.mi-save {
+    color: $color-blue;
+  }
+}

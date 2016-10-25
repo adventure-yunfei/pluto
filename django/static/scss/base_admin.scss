@@ -1,0 +1,15 @@
+/** Start: Css Rules for File Input **/
+.LoginUser {
+  float: right;
+  font-size: 10pt;
+  margin-top: 5px;
+
+  .Logout {
+    margin-left: 10px;
+  }
+}
+
+.FileUpload input[type="file"] {
+  display: none;
+}
+/** End: Css Rules for File Input **/

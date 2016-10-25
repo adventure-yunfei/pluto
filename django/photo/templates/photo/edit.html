@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block docTitle %}Hi, Yunfei! - Edit{% endblock %}
+
+{% block headReferences %}
+<link type="text/css" rel="stylesheet" href="/static/css/photo/edit.css" />
+<link type="text/css" rel="stylesheet" href="/static/plugins/css/button.css"/>
+{% endblock %}
+
+{% block mainContent %}
+<form id="Edit" action="/save" method="POST" helperClass="photo/EditPhotography">
+    <input type="text" id="Edit_Title" name="title"/>
+    <br/>
+    <input type="checkbox" class="allowImageOverwrite"/><label title="允许上传图片时覆盖同名图片">允许图片覆盖</label>
+    <br/>
+    <div class="FileUpload">
+        <div class="FileUpload_Picker floatContainer">
+            <span>点击上传原始尺寸图片</span>
+            <i class="fi fi-upload"></i>
+        </div>
+        <input id="Edit_UploadImage" type="file" class="EditEntry_UploadThumbnail" multiple/>
+    </div>
+    <br/>
+    <div class="FileUpload">
+        <div class="FileUpload_Picker floatContainer">
+            <span>点击上传标准尺寸图片</span>
+            <i class="fi fi-upload"></i>
+        </div>
+        <input id="Edit_UplaodNormalizedImage" type="file" class="EditEntry_UploadThumbnail" multiple/>
+    </div>
+    <br/><br/>
+    <textarea id="Edit_Content" name="content"></textarea>
+    <br/><br/>
+    <button class="button save">保存</button>
+</form>
+{% endblock %}

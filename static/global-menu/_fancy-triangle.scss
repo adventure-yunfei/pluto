@@ -1,0 +1,121 @@
+$sin-60: 1.7320508075688772 / 2;
+$cos-60: 0.5;
+@mixin line-triangle($color, $line-length, $line-width) {
+  $width: $line-length;
+  $height: $line-length * $sin-60;
+  position: absolute;
+  width: $width;
+  height: $height;
+  .line {
+    position: absolute;
+    width: $line-length;
+    height: $line-width;
+    background-color: $color;
+  }
+  .line-1 {
+    transform: translate(-$width / 4, $height / 2) rotate(-60deg);
+    border-radius: 0 #{$line-width/2} 0 #{$line-width/2}; // border-radius 消除边的两段的不自然连接
+  }
+  .line-2 {
+    transform: translate($width / 4, $height / 2) rotate(60deg);
+    border-radius: #{$line-width/2} 0 #{$line-width/2} 0;
+  }
+  .line-3 {
+    transform: translate(0, $height - $line-width / 2);
+    border-radius: 0 0 #{$line-width/2} #{$line-width/2};
+  }
+}
+
+
+.fancy-triangle {
+  $width: 50px;
+  $height: $width * $sin-60;
+  $line-width: 2px;
+  $inner-width: $width / 2 - $line-width;
+  $inner-height: $inner-width * $sin-60;
+  position: absolute;
+
+  @mixin outer-triangle-common {
+    height: 58.5px;
+  }
+  .outer-triangle {
+    @include line-triangle(#00eeee, $width, $line-width);
+    @include outer-triangle-common();
+  }
+  .outer-triangle-shadow {
+    @include line-triangle(transparent, $width, 1px);
+    @include outer-triangle-common();
+  }
+
+  @mixin inner-triangle-common {
+    height: 27.5px;
+    left: ($width - $inner-width) / 2;
+    top: 16px;
+    transform: rotate(180deg);
+  }
+  .inner-triangle {
+    @include line-triangle(#fff000, $inner-width, $line-width);
+    @include inner-triangle-common();
+  }
+  .inner-triangle-shadow {
+    @include line-triangle(transparent, $inner-width, 1px);
+    @include inner-triangle-common();
+  }
+
+  .outer-triangle-shadow,
+  .inner-triangle-shadow {
+    margin: 10px 0 0 20px;
+    .line {
+      box-shadow: 0 0 15px rgba(0,0,0,0.5), 0 0 100px rgba(0,0,0,0.04) inset;
+    }
+  }
+
+
+  &:hover {
+    .inner-triangle,
+    .inner-triangle-shadow {
+      animation: another-rotate-from-180deg 3s infinite;
+      animation-timing-function: linear;
+    }
+  }
+
+  &.animate {
+    .outer-triangle,
+    .outer-triangle-shadow {
+      animation: rotate-from-0deg 1s;
+    }
+    .inner-triangle,
+    .inner-triangle-shadow {
+      animation: rotate-from-180deg 1s;
+      animation-delay: 0.5s;
+    }
+  }
+}
+
+
+@keyframes rotate-from-0deg {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotate-from-180deg {
+  0% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(180deg + 360deg );
+  }
+}
+
+@keyframes another-rotate-from-180deg {
+  0% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(180deg + 360deg );
+  }
+}

@@ -1,0 +1,29 @@
+### Common build or config ###
+# Idea & Intellij
+.settings
+.idea
+*.iml
+# scss
+.sass-cache
+# Gradle
+.gradle
+# npm
+node_modules/
+.module-cache
+# Python
+*.pyc
+*.pyo
+
+### java-servlet project ###
+# java build
+/java-servlet/build/
+/java-servlet/classes
+# Web build: npm, scss, react-jsx
+/java-servlet/web/*/css/
+/java-servlet/web/*/js/jsx/
+/java-servlet/web/node_modules/
+# build script
+/pluto-apache-config.conf
+/pluto-nginx-config
+/django/djproj-uwsgi.ini
+/django/djproj-uwsgi.pid

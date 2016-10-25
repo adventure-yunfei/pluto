@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block docTitle %}Hi, Yunfei - {{photographyTitle}}{% endblock %}
+
+{% block headReferences %}
+<link type="text/css" rel="stylesheet" href="/static/css/photo/photography.css" />
+{% endblock %}
+
+{% block mainContent %}
+<div id="Photography_Title" >{{photographyTitle}}</div>
+<div id="Photography_Content" >{{photographyContent}}</div>
+{% endblock %}

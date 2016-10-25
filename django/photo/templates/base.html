@@ -1,0 +1,76 @@
+{% load utils %}
+
+<!DOCTYPE HTML>
+<head>
+    <title>{% block docTitle %}Hi Yunfei!{% endblock %}</title>
+    <link href="/static/img/favicon.ico" rel="shortcut icon">
+    <!-- 加载 global-menu 样式 -->
+    <link type="text/css" rel="stylesheet" href="http://{{hosts.static.by_domain}}/dist/global-menu/global-menu.css"/>
+    <link type="text/css" rel="stylesheet" href="/static/css/base.css" />
+    {% if admin %}
+        <link type="text/css" rel="stylesheet" href="/static/css/base_admin.css" />
+    {% endif %}
+    <script type="text/javascript" src="/static/plugins/require.min.js"></script>
+    <script type="text/javascript" src="/static/js/requirejsConfig.js"></script>
+    {% if debug %}
+        <script language="javascript" src="/static/plugins/jquery-2.1.1.js"></script>
+    {% else %}
+        <script language="javascript" src="/static/plugins/jquery-2.1.1.min.js"></script>
+    {% endif %}
+    <script language="javascript" src="/static/js/jQuery.adventure.js"></script>
+    <script>
+        // 插入百度统计代码
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?{{appGlobalConfig.baiduAnalytics}}";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    <script>
+        // TODO: Set for Django Debug Toolbar to force their js not to use define
+        define.amd = false;
+    </script>
+    {% block headReferences %}{% endblock %}
+    <script language="javascript">
+    $(function () {
+        require(['$a'], function ($a) {
+            $a.autoAsyncCreateHelpers(document);
+        });
+    });
+    </script>
+    {% block onLoadScript %}{% endblock %}
+</head>
+
+<body>
+{% block bodyContent %}
+    <div id="PageContainer" >
+        <div class="global-menu-toggler"></div> <!-- global-menu显示/隐藏开关 -->
+        <!-- start: Page Title -->
+        <div id="PageTitle" >Hi Yunfei! {% if admin %}<div class="LoginUser">{{username}}<a class="Logout" href="/logout">登出</a></div>{% endif %}</div>
+        <img class="titleImage" src="/static/img/title_image.jpg" />
+        <br/>
+        <!-- end: Page Title -->
+
+        <!-- start: Navigation Bar -->
+        <div id="Toolbar" >
+            <ul >
+                <li><a title="home" href="/">首页</a></li>
+                <li><a title="about" href="/about">关于</a></li>
+            </ul>
+        </div>
+        <!-- end: Navigation Bar -->
+
+        <!-- start: Main Content -->
+        {% block mainContent %}{% endblock %}
+        <!-- end: Main Content -->
+
+        <!-- start: Page Bottom -->
+        <div id="PageBottom" >Author: Yunfei. In Python &amp; Django.</div>
+        <!-- end: Page Bottom -->
+    </div>
+{% endblock %}
+<!-- 加载 global-menu js 文件并配置生成全局菜单 -->
+<script type="text/javascript" src="http://{{hosts.static.by_domain}}/dist/global-menu/global-menu.js"></script>
+</body>

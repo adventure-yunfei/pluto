@@ -1,0 +1,33 @@
+@charset "UTF-8";
+
+.HomePage {
+  .loading-tip {
+    display: block !important;
+    margin: 100px auto !important;
+  }
+
+  .Section_Title {
+    font: bold 12px Tahoma, Verdana, sans-serif, "宋体";
+    color: #777777;
+  }
+
+  .Section_Entries .Entry {
+    display: inline-block;
+    padding: 5px;
+    vertical-align: top;
+
+    .Entry_Title {
+      text-align: center;
+
+      a {
+        color: #999999;
+      }
+    }
+
+    .Entry_Thumbnail {
+      width: 150px;
+      height: 150px;
+      border: 3px solid #eee;
+    }
+  }
+}

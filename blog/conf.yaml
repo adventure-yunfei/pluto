@@ -1,0 +1,29 @@
+#GitBlog配置文件，使用4个空格代替Tab
+---
+url: http://blog.yunfei.me
+title: Blog - Yunfei
+subtitle: 知之为知之，不知为不知，是知也。
+theme: quest-customized
+enableCache: true
+highlight: true
+mathjax: false
+duoshuo: 
+baiduAnalytics: 
+keywords: Adventure,yunfei,GitBlog,博客,Markdown博客
+description: >
+    GitBlog是一个简单易用的Markdown博客系统
+version: 2.2
+author:
+    name: yunfei
+    email: 
+    github: adventure-yunfei
+    weibo: 
+    avatar:
+blog:
+    recentSize: 5
+    pageSize: 6
+    pageBarSize: 5
+    allBlogsForPage: false
+text:
+    title: # 介绍
+    intro: # 本博客使用Gitblog搭建，欢迎你!

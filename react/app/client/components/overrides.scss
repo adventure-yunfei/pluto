@@ -1,0 +1,44 @@
+@import "mixins";
+
+/* Continue normalize */
+body {
+  font-size: 16px;
+  color: #555;
+}
+
+input {
+  padding: 0 5px;
+}
+
+textarea {
+  padding: 5px;
+}
+
+input,
+textarea {
+  @include border();
+}
+
+input,
+textarea,
+[contenteditable] {
+  &:focus {
+    outline: none;
+  }
+}
+
+
+/* override ant design */
+.ant-message {
+  @include center-align(true, true);
+  position: fixed;
+  left: auto;
+  top: auto;
+  bottom: 70%;
+}
+
+label,
+.ant-message,
+.ant-modal-body {
+  font-size: inherit;
+}

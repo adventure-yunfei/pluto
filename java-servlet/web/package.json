@@ -1,0 +1,21 @@
+{
+  "name": "pluto",
+  "description": "Project for yunfei's website",
+  "version": "0.1.0",
+  "author": "yunfei",
+  "private": true,
+  "dependencies": {
+    "jquery": "^2.1.4",
+    "jquery-ui": "^1.10.5",
+    "lodash": "^3.10.0",
+    "react": "^0.13.3"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-babel": "^5.1.0",
+    "gulp-react": "^3.0.1",
+    "gulp-sass": "^2.0.4",
+    "gulp-sourcemaps": "^1.5.2",
+    "merge-stream": "^0.1.8"
+  }
+}

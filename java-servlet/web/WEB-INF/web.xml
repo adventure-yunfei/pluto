@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" id="WebApp_ID" version="3.1">
+  <display-name>Pluto</display-name>
+  <welcome-file-list>
+    <welcome-file>/common/jsp/index.jsp</welcome-file>
+  </welcome-file-list>
+
+  <servlet>
+    <servlet-name>CouchdbForwarder</servlet-name>
+    <servlet-class>adv.common.servlet.CouchdbForwarderServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>CouchdbForwarder</servlet-name>
+    <url-pattern>/couchdb</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>blog</servlet-name>
+    <servlet-class>adv.common.servlet.PageServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>blog</servlet-name>
+    <url-pattern>/blog</url-pattern>
+  </servlet-mapping>
+</web-app>

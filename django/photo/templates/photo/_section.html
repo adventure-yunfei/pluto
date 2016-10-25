@@ -1,0 +1,15 @@
+<div class="Section" {% if admin %} helperClass="photo/Section" helperIdPrefix="Section_" sectionId="{{section.id|default_if_none:"##id##"}}" {% endif %}>
+    <div class="Section_Title" ><span>{{section.name|default_if_none:"##name##"}}</span>
+        {% if admin %}
+            <div class="EditingIcons EditingTool">
+                <i class="EditEntries fi fi-pencil" title="Edit Entries"></i>
+                <i class="RemoveSection fi fi-minus" title="Remove Section"></i>
+            </div>
+        {% endif %}
+    </div>
+    <div class="Section_Entries floatContainer" >
+        {% for entry in section.entries %}
+            {% include "photo/_entry.html" %}
+        {% endfor %}
+    </div>
+</div>

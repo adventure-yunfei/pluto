@@ -1,0 +1,12 @@
+{
+  "name": "django-frontend",
+  "private": true,
+  "dependencies": {
+    "javascript-class": "^1.0.2",
+    "jquery": "^2.2.2",
+    "materialize-css": "^0.97.5"
+  },
+  "devDependencies": {
+    "gulp-task-listing": "^1.0.1"
+  }
+}

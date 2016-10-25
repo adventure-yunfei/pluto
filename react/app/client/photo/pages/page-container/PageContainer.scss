@@ -1,0 +1,49 @@
+@import "../../../components/variables";
+
+.global-menu-toggler {
+  position: fixed;
+  z-index: 9999;
+}
+
+.PageContainer {
+  $page-content-width: 781px;
+  padding-top: 64px;
+
+  .nav-bar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+
+    .nav-bar-tab-list {
+      margin-right: 40px;
+      .nav-bar-tab {
+        width: 150px !important;
+        height: 64px !important;
+      }
+    }
+
+    .username {
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      color: $color-white;
+    }
+
+    .login-and-out button {
+      font-size: 12px !important;
+      color: $color-white !important;
+      min-width: 50px !important;
+    }
+  }
+
+  .page-content {
+    width: $page-content-width;
+    margin: 30px auto 0;
+  }
+
+  .page-bottom {
+    width: $page-content-width;
+    margin: 50px auto 0;
+    font-size: 10pt;
+  }
+}

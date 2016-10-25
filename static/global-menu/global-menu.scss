@@ -1,0 +1,68 @@
+@import "fancy-triangle";
+
+.global-menu {
+  position: fixed;
+  top: 0;
+  width: 240px;
+  z-index: 10000;
+  height: 100%;
+  padding-top: 30px;
+  background-color: #fff;
+  color: #555;
+  transition-duration: 800ms;
+  box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);
+  font-size: 16px;
+
+  pointer-events: none;
+  left: -70px;
+  opacity: 0;
+  &.show-menu {
+    pointer-events: auto;
+    left: 0;
+    opacity: 1;
+  }
+
+  .global-menu-item {
+    display: block;
+    height: 64px;
+    line-height: 64px;
+    padding: 0 30px;
+    text-align: left;
+    text-decoration: none;
+    color: inherit;
+
+    &:hover,
+    &.active {
+      background-color: rgba(0,0,0,0.05);
+    }
+  }
+
+  .sub-menus-container .global-menu-item {
+    padding-left: 60px;
+  }
+
+  .root-menu-container.deprecated {
+    color: #bebebe;
+    .global-menu-item.root-menu {
+      text-decoration: line-through;
+    }
+    .sub-menus-container {
+      max-height: 0;
+      transition-duration: 200ms;
+      overflow: hidden;
+    }
+    &:hover {
+      .sub-menus-container {
+        max-height: 200px;
+      }
+    }
+  }
+}
+
+
+.global-menu-toggler {
+  top: 10px;
+  left: 70px;
+  z-index: 9999;
+  cursor: pointer;
+}

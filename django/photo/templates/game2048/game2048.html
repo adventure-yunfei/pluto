@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load utils %}
+
+{% block headReferences %}
+<link type="text/css" rel="stylesheet" href="/static/plugins/css/button.css"/>
+<link type="text/css" rel="stylesheet" href="/static/plugins/css/animate.css"/>
+<link type="text/css" rel="stylesheet" href="/static/css/game2048/game2048.css"/>
+{% endblock %}
+
+{% block mainContent %}
+<div id="game2048" helperClass="game2048/game2048">
+    <div id="score">score: <span>0</span></div>
+
+    <!-- Begin: Background layer -->
+    <div class="backgroundContainer">
+        {% for i in 4|get_range %}
+        <div class="floatContainer">
+            {% for j in 4|get_range %}
+            <div class="square"></div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+    <!-- End: Background layer -->
+
+    <!-- Begin: Front squares layer -->
+    <div class="squaresContainer"></div>
+    <!-- End: Front squares layer -->
+</div>
+<div class="Game2048_Player" helperClass="game2048/game2048_Player" helperIdPrefix="2048Player_" suppressAutoCreate >
+    <button class="AutoPlay button">Auto-Play Game</button>
+    <button class="AutoPlayOnSpaceKey button">Play on Space Key</button>
+    <br/>
+    <button class="RandomAutoPlay button">Random Auto-Play without Algorithm</button>
+</div>
+{% endblock %}
+
+{% block onLoadScript %}
+    <script language="javascript">
+        require(['$a'], function ($a) {
+            // Create game248 auto-player when game2048 is ready
+            (function newGame2048_Player() {
+                var game2048Helper = $a.helpers.game2048;
+                if (game2048Helper) {
+                    $('.Game2048_Player').each(function (idx, node) {
+                        $a.asyncNewHelper(node, {
+                            game2048: game2048Helper,
+                            calculateSteps: 3
+                        });
+                    });
+                } else {
+                    window.setTimeout(newGame2048_Player, 100);
+                }
+            })();
+        });
+    </script>
+{% endblock %}

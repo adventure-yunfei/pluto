@@ -1,0 +1,94 @@
+@charset "utf-8";
+@import "global_mixins";
+
+/** Start: Base Element Style */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+body{
+  margin: 0;
+}
+input {
+  box-sizing: border-box;
+  height: 22px;
+  margin: 0;
+}
+/** End: Base Element Style */
+
+#PageContainer {
+  position: relative;
+  width: 781px;
+  margin: 0 auto;
+
+  #PageTitle {
+    font: bold 20px Tahoma;
+    color: #999999;
+  }
+
+  #Toolbar ul {
+    font: bold 12px Tahoma;
+    list-style: none outside none;
+    height: 30px;
+    margin: 0;
+    padding: 0;
+
+    li {
+      float: left;
+      margin-right: 5px;
+
+      a {
+        color: #999999;
+      }
+    }
+  }
+
+  #PageBottom {
+    margin-top: 50px;
+    font-size: 10pt;
+  }
+}
+
+#Curtain,
+#Loading {
+  position: absolute;
+  left:0; top:0; right:0; bottom:0;
+}
+
+/** Start: Global css classes rules */
+.floatContainer {
+  overflow: auto;
+  > * {
+    float: left;
+  }
+}
+/** End: Global css classes rules */
+
+/** Start: Css Rules for Foundation Icons */
+.fi {
+  display: block;
+  width: 23px;
+  height: 23px;
+  font-size: 14pt;
+  color: #000000;
+  cursor: pointer;
+
+  &.fi-plus {
+    color: green;
+  }
+  &.fi-minus {
+    color: red;
+  }
+  &.fi-pencil {
+    color: orange;
+  }
+  &.fi-save {
+    color: blue;
+  }
+}
+/** End: Css Rules for Foundation Icons */
+
+.global-menu-toggler {
+  top: 250px;
+  left: 10px;
+}

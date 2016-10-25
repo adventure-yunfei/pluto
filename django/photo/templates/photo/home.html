@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block docTitle %}Hi, Yunfei! - Home{% endblock %}
+
+{% block headReferences %}
+<link type="text/css" rel="stylesheet" href="/static/css/photo/home.css" />
+{% if admin %}
+    <link type="text/css" rel="stylesheet" href="/static/css/photo/home_admin.css" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/Foundation/css/foundation-icons.css"/>
+    <link type="text/css" rel="stylesheet" href="/static/plugins/css/button.css"/>
+    <script language="javascript" src="//code.jquery.com/ui/1.10.3/jquery-ui.js" onerror="alert('加载jQuery UI库失败！')"></script>
+    <link type="text/css" rel="stylesheet" href="//code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css"/>
+{% endif %}
+{% endblock %}
+
+{% block mainContent %}
+<div {% if admin %}id="Sections" helperClass="photo/Sections"{% endif %}>
+{% if admin %}
+    <i id="ToggleEditing" class="fi fi-pencil" title="Enable Editing Sections and Entries (Add, Remove, Modify)"></i>
+    <i id="SaveSectionsChange" class="EditingTool fi fi-save" title="Save Sections Change"></i>
+    <div id="AddSection" class="EditingTool floatContainer" action="addSection">
+        <input type="text" name="name">
+        <i class="fi fi-plus" title="Add Section"></i>
+    </div>
+{% endif %}
+<div id="SectionsList">
+    {% for section in sections %}
+        {% include "photo/_section.html" %}
+    {% endfor %}
+</div>
+</div>
+{% endblock %}

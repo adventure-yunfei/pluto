@@ -1,0 +1,8 @@
+<div class="Entry" {% if admin %} entryID="{{entry.id|default_if_none:"##id##"}}" {% endif %}>
+    <a href="{{entry.target_link|default_if_none:"##target_link##"}}" >
+        <img class="Entry_Thumbnail" src="{{entry.thumbnail_image_src|default_if_none:"##thumbnail_image_src##"}}" />
+    </a>
+    <div class="Entry_Title" >
+        <a href="{{entry.target_link|default_if_none:"##target_link##"}}" >{{entry.title|default_if_none:"##title##"}}</a>
+    </div>
+</div>

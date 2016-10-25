@@ -1,0 +1,3 @@
+<a href="{{entry.link}}" (mouseenter)="onMouseEnter(entry, idx)" (mouseleave)="onMouseLeave(entry, idx)">
+    {{entry.title.slice(0, titleDisplaySize) || '\u00A0'}}<span class="caret-flush">_</span>
+</a>

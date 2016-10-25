@@ -1,0 +1,25 @@
+@charset "utf-8";
+@import "variables";
+
+/**用定位+transform的方式实现居中
+   使用right/bottom定位而非top/left，因在IE下超出右下边界后将显示滚动条，即使设transform将元素移回视区内；
+   而超出左上边界时浏览器不会显示滚动条 */
+@mixin center-align($horizontal: true, $vertical: true, $position: absolute) {
+  position: $position;
+  $translateX: 0;
+  $translateY: 0;
+  @if $horizontal {
+    right: 50%;
+    $translateX: 50%;
+  }
+  @if $vertical {
+    bottom: 50%;
+    $translateY: 50%;
+  }
+  transform: translate($translateX, $translateY);
+}
+
+@mixin border() {
+  border: 1px solid $color-border;
+  border-radius: $border-radius;
+}

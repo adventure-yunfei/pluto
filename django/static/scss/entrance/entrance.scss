@@ -1,0 +1,124 @@
+$gap: 20px;
+$top-padding: 20px;
+
+body {
+  background-color: #eee;
+}
+
+.container {
+  position: absolute;
+  left: 50%;
+  width: $gap;
+  height: $gap;
+  margin-top: $top-padding;
+  margin-left: - $gap / 2;
+
+  .item {
+    position: absolute;
+    display: block;
+    box-sizing: border-box;
+    background-size: cover;
+    background-color: #fff;
+    background-position: center;
+    background-repeat: no-repeat;
+    animation-fill-mode: both;
+    animation-duration: 1s;
+    animation-timing-function: ease-out;
+    &:hover {
+      // extends from .z-depth-5
+      box-shadow: 0 27px 24px 0 rgba(0, 0, 0, 0.2), 0 40px 77px 0 rgba(0, 0, 0, 0.22);
+    }
+  }
+
+  .photo-site {
+    bottom: 100%;
+    right: 100%;
+    background-image: url(/static/img/entrance/photo-site.jpeg);
+    animation-name: enter-up-left;
+  }
+
+  .blog-site {
+    bottom: 100%;
+    left: 100%;
+    background-image: url(/static/img/entrance/blog-site.jpeg);
+    animation-name: enter-up-right;
+  }
+
+  .game2048 {
+    top: 100%;
+    right: 100%;
+    background-image: url(/static/img/entrance/2048.jpg);
+    animation-name: enter-bottom-left;
+  }
+
+  .zhihu-daily-app {
+    top: 100%;
+    left: 100%;
+    background-image: url(/static/img/entrance/zhihu-daily.jpeg);
+    animation-name: enter-bottom-right;
+  }
+}
+
+@mixin fit-to-screen-size($screen-size) {
+  @media all and (min-width: $screen-size) and (min-height: $screen-size) {
+    $size: ($screen-size - $gap - $top-padding) / 2;
+    .container {
+      top: $size;
+      .item {
+        width: $size;
+        height: $size;
+      }
+    }
+  }
+}
+
+.beian-info {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+
+@include fit-to-screen-size(100px);
+@include fit-to-screen-size(300px);
+@include fit-to-screen-size(400px);
+@include fit-to-screen-size(500px);
+@include fit-to-screen-size(600px);
+@include fit-to-screen-size(700px);
+@include fit-to-screen-size(800px);
+
+
+@keyframes enter-up-left {
+  0% {
+    transform: translate(-100%, -100%);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes enter-up-right {
+  0% {
+    transform: translate(100%, -100%);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes enter-bottom-left {
+  0% {
+    transform: translate(-100%, 100%);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes enter-bottom-right {
+  0% {
+    transform: translate(100%, 100%);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}

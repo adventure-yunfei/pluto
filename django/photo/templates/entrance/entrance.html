@@ -1,0 +1,35 @@
+{% with static_domain=hosts.static.by_domain %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hi Yunfei!</title>
+    <link rel="stylesheet" href="/static/node_modules/materialize-css/dist/css/materialize.min.css"/>
+    <link rel="stylesheet" href="/static/css/entrance/entrance.css"/>
+    <link rel="stylesheet" href="http://{{static_domain}}/dist/global-menu/global-menu.css"/>
+</head>
+<body>
+
+<div class="global-menu-toggler"></div><!-- global-menu显示/隐藏开关 -->
+
+<div class="container">
+    <a class="waves-effect waves-teal btn item photo-site" href="//{{hosts.react.by_domain}}"></a>
+    <a class="waves-effect waves-teal btn item blog-site" href="//{{hosts.gitblog.by_domain}}"></a>
+    <a class="waves-effect waves-teal btn item game2048" href="//{{hosts.react.by_domain}}/2048"></a>
+    <a class="waves-effect waves-teal btn item zhihu-daily-app" href="https://github.com/adventure-yunfei/react-native-zhihu-daily"></a>
+
+    <script src="/static/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="/static/node_modules/materialize-css/dist/js/materialize.min.js"></script>
+    <script src="http://{{static_domain}}/dist/global-menu/global-menu.js"></script>
+</div>
+
+<div class="beian-info">
+		 	<div style="width:300px;margin:0 auto; padding:20px 0;">
+		 		<a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=33010602005762" style="display:inline-block;text-decoration:none;height:20px;line-height:20px;"><img src="/static/img/entrance/beian-icon.png" style="float:left;"/><p style="float:left;height:20px;line-height:20px;margin: 0px 0px 0px 5px; color:#939393;">浙公网安备 33010602005762号</p></a>
+		 	</div>
+		 
+</div>
+
+</body>
+</html>
+{% endwith %}

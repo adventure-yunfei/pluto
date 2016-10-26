@@ -58,8 +58,8 @@ function getPageHtml(appContentHtml, state = {}) {
 var _hmt = _hmt || [];
 (function() {
   var baiduAnalytics = "${globalConfig["react-photosite"]["baiduAnalytics"] || ""}";
-  if (baiduAnalytics) {
-    window.alert("百度统计配置未添加.");
+  if (!baiduAnalytics) {
+    console.error("百度统计配置未添加.");
     return;
   }
   var hm = document.createElement("script");

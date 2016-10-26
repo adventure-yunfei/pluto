@@ -231,7 +231,7 @@ commander
             .then(function () {
                 log('# 编译 STATIC 工程...');
                 chdir(PROJ_ROOT + '/static');
-                return execAsync('cnpm', ['install'])
+                return execAsync('npm', ['install'])
                     .then(function () {
                         return execAsync('gulp', []);
                     });
@@ -247,7 +247,7 @@ commander
                 return Promise.resolve()
                     .then(function () {
                         log('  - 安装npm包...');
-                        return execAsync('cnpm', ['install'])
+                        return execAsync('npm', ['install'])
                     })
                     .then(function () {
                         log('  - 编译文件...');

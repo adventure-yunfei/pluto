@@ -10,6 +10,7 @@
     "gulp-sass": "^2.0.4",
     "gulp-sourcemaps": "^1.6.0",
     "lodash": "^4.6.1",
-    "mustache": "^2.2.1"
+    "mustache": "^2.2.1",
+    "node-sass": "^3.10.1"
   }
 }

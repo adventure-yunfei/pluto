@@ -34,28 +34,28 @@ body {
     bottom: 100%;
     right: 100%;
     background-image: url(/static/img/entrance/photo-site.jpeg);
-    animation-name: enter-up-left;
+    //animation-name: enter-up-left;
   }
 
   .blog-site {
     bottom: 100%;
     left: 100%;
     background-image: url(/static/img/entrance/blog-site.jpeg);
-    animation-name: enter-up-right;
+    //animation-name: enter-up-right;
   }
 
   .game2048 {
     top: 100%;
     right: 100%;
     background-image: url(/static/img/entrance/2048.jpg);
-    animation-name: enter-bottom-left;
+    //animation-name: enter-bottom-left;
   }
 
   .zhihu-daily-app {
     top: 100%;
     left: 100%;
     background-image: url(/static/img/entrance/zhihu-daily.jpeg);
-    animation-name: enter-bottom-right;
+    //animation-name: enter-bottom-right;
   }
 }
 

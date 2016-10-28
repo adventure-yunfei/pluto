@@ -254,6 +254,14 @@ commander
                         return execAsync('gulp', ['build', '-p']);
                     });
             })
+            .then(function () {
+                log('# 编译 typescript-entrance 工程...');
+                chdir(PROJ_ROOT + '/typescript-entrance');
+                return execAsync('npm', ['install'])
+                    .then(function () {
+                        return execAsync('npm', ['run', 'build'];
+                    });
+            })
 
             .then(function () {
                 chdir(PROJ_ROOT);
@@ -313,7 +321,7 @@ commander
                     '# Config for entrance:',
                     'server {',
                     '    listen      80;',
-                    '    root        ' + PROJ_ROOT + '/typescript-entry/build;',
+                    '    root        ' + PROJ_ROOT + '/typescript-entrance/build;',
                     '}',
                     ''
                 ].join('\n'));

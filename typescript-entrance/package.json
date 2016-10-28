@@ -1,7 +1,8 @@
 {
   "scripts": {
     "build": "rimraf build && DEV=false webpack",
-    "build-dev": "DEV=true webpack -w -d"
+    "build-dev": "DEV=true webpack -w -d",
+    "postinstall": "typings install"
   },
   "dependencies": {
     "awesome-letter-animation": "github:adventure-yunfei/awesome-letter-animation#release-yf",
@@ -22,6 +23,7 @@
     "style-loader": "^0.13.1",
     "ts-loader": "^0.9.0",
     "typescript": "^2.0.3",
+    "typings": "^1.4.0",
     "url-loader": "^0.5.7",
     "webpack": "^1.13.2"
   },

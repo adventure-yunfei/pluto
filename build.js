@@ -302,7 +302,7 @@ commander
         var outputFile = this.output || 'pluto-nginx-config',
             hosts = config.hosts,
             cfgStr = '',
-            templatesDir = PROJ_ROOT + '/build/nginx-config-templates',
+            templatesDir = PROJ_ROOT + '/build-resources/nginx-config-templates',
             addConfigStr = function (renderedConfig) {
                 cfgStr += renderedConfig;
             };
@@ -310,10 +310,20 @@ commander
         return Promise.resolve()
             .then(function () {
                 addConfigStr([
+                    '# Config for entrance:',
+                    'server {',
+                    '    listen      80;',
+                    '    root        ' + PROJ_ROOT + '/typescript-entry/build;',
+                    '}',
+                    ''
+                ].join('\n'));
+            })
+            .then(function () {
+                addConfigStr([
                     '# Config for STATIC:',
                     'server {',
                     '    listen      ' + hosts.static.by_port + ';',
-                    '    root ' + PROJ_ROOT + '/static;',
+                    '    root        ' + PROJ_ROOT + '/static;',
                     '}',
                     ''
                 ].join('\n'));
@@ -337,22 +347,6 @@ commander
                         return renderTemplateFile(templatesDir + '/domain-to-port-proxy', host).then(addConfigStr);
                     }
                 }));
-            })
-            .then(function () {
-                var djangoPort = hosts.django.by_port;
-                addConfigStr([
-                    '# Manually Proxy for entrance:',
-                    'server {',
-                    '    listen      80 default_server;',
-                    '    location /static {',
-                    '        proxy_pass http://localhost:' + djangoPort + '/static;',
-                    '    }',
-                    '    location / {',
-                    '        proxy_pass http://localhost:' + djangoPort + '/entrance/;',
-                    '    }',
-                    '}',
-                    ''
-                ].join('\n'));
             })
             .then(function () {
                 fs.writeFileSync(outputFile, cfgStr);

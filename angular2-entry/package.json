@@ -1,4 +1,5 @@
 {
+  "private": true,
   "scripts": {
     "dev": "webpack-dev-server --content-base __nothing__ -d"
   },

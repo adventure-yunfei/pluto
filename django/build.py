@@ -10,6 +10,6 @@ r = os.system('pip install -r requirements.txt')
 # 安装前端依赖及编译
 r = r or os.chdir('static');
 r = r or os.system('npm install');
-r = r or os.system('gulp scss');
+r = r or os.system('npm run build');
 
 exit(r)

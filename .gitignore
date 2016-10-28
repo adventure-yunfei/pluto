@@ -1,16 +1,25 @@
 ### Common build or config ###
+build/
+
 # Idea & Intellij
 .settings
 .idea
 *.iml
+
 # scss
 .sass-cache
+
 # Gradle
 .gradle
+
 # npm
 node_modules/
 .module-cache
 npm-debug.log
+
+# typings
+typings/
+
 # Python
 *.pyc
 *.pyo

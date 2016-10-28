@@ -1,0 +1,31 @@
+{
+  "scripts": {
+    "build": "rimraf build && DEV=false webpack",
+    "build-dev": "DEV=true webpack -w -d"
+  },
+  "dependencies": {
+    "awesome-letter-animation": "github:adventure-yunfei/awesome-letter-animation#release-yf",
+    "jquery": "^3.1.1",
+    "materialize-css": "^0.97.7",
+    "normalize.css": "^5.0.0",
+    "zepto": "^1.2.0"
+  },
+  "devDependencies": {
+    "css-loader": "^0.25.0",
+    "extract-text-webpack-plugin": "^1.0.1",
+    "file-loader": "^0.9.0",
+    "html-webpack-plugin": "^2.22.0",
+    "imports-loader": "^0.6.5",
+    "less": "^2.7.1",
+    "less-loader": "^2.2.3",
+    "rimraf": "^2.5.4",
+    "style-loader": "^0.13.1",
+    "ts-loader": "^0.9.0",
+    "typescript": "^2.0.3",
+    "url-loader": "^0.5.7",
+    "webpack": "^1.13.2"
+  },
+  "name": "typescript-entry",
+  "version": "1.0.0",
+  "author": "adventure-yunfei"
+}

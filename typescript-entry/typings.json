@@ -1,0 +1,5 @@
+{
+  "globalDependencies": {
+    "zepto": "registry:dt/zepto#1.0.0+20160316155526"
+  }
+}

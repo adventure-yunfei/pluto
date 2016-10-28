@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="http://<%= htmlWebpackPlugin.options.hosts.static.by_domain %>/dist/global-menu/global-menu.css"/>
+</head>
+<body>
+<div class="global-menu-toggler"></div>
+
+<div class="container">
+    <a class="waves-effect waves-teal btn item photo-site" href="//<%=htmlWebpackPlugin.options.hosts.react.by_domain%>"></a>
+    <a class="waves-effect waves-teal btn item blog-site" href="//<%=htmlWebpackPlugin.options.hosts.gitblog.by_domain%>"></a>
+    <a class="waves-effect waves-teal btn item game2048" href="//<%=htmlWebpackPlugin.options.hosts.react.by_domain%>/2048"></a>
+    <a class="waves-effect waves-teal btn item zhihu-daily-app" href="https://github.com/adventure-yunfei/react-native-zhihu-daily"></a>
+</div>
+
+<div class="beian-info">
+    <div style="width:300px;margin:0 auto; padding:20px 0;">
+        <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=33010602005762" style="display:inline-block;text-decoration:none;height:20px;line-height:20px;"><img src="" style="float:left;"/><p style="float:left;height:20px;line-height:20px;margin: 0px 0px 0px 5px; color:#939393;">浙公网安备 33010602005762号</p></a>
+    </div>
+</div>
+
+<script src="http://<%=htmlWebpackPlugin.options.hosts.static.by_domain%>/dist/global-menu/global-menu.js"></script>
+</body>
+</html>

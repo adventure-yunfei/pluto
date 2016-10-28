@@ -1,0 +1,97 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+
+svg.logo-animator {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+}
+
+@gap: 20px;
+@top-padding: 20px;
+
+body {
+  background-color: #eee;
+}
+
+.container {
+  position: absolute;
+  left: 50%;
+  width: @gap;
+  height: @gap;
+  margin-top: @top-padding;
+  margin-left: - @gap / 2;
+
+  .item {
+    position: absolute;
+    display: block;
+    box-sizing: border-box;
+    background-size: cover;
+    background-color: #fff;
+    background-position: center;
+    background-repeat: no-repeat;
+    &:hover {
+      box-shadow: 0 27px 24px 0 rgba(0, 0, 0, 0.2), 0 40px 77px 0 rgba(0, 0, 0, 0.22);
+    }
+  }
+
+  .photo-site {
+    bottom: 100%;
+    right: 100%;
+    background-image: url(images/photo-site.jpeg);
+  }
+
+  .blog-site {
+    bottom: 100%;
+    left: 100%;
+    background-image: url(images/blog-site.jpeg);
+  }
+
+  .game2048 {
+    top: 100%;
+    right: 100%;
+    background-image: url(images/2048.jpg);
+  }
+
+  .zhihu-daily-app {
+    top: 100%;
+    left: 100%;
+    background-image: url(images/zhihu-daily.jpeg);
+  }
+}
+
+.fit-to-screen-size(@screen-size) {
+  @media all and (min-width: @screen-size) and (min-height: @screen-size) {
+    @size: (@screen-size - @gap - @top-padding) / 2;
+    .container {
+      top: @size;
+      .item {
+        width: @size;
+        height: @size;
+      }
+    }
+  }
+}
+
+.fit-to-screen-size(100px);
+.fit-to-screen-size(300px);
+.fit-to-screen-size(400px);
+.fit-to-screen-size(500px);
+.fit-to-screen-size(600px);
+.fit-to-screen-size(700px);
+.fit-to-screen-size(800px);
+
+.beian-info {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}

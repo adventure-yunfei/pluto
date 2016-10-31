@@ -15,11 +15,8 @@ $(() => {
         $squares = $('.container'),
         $globalMenu = $('.global-menu-toggler');
     $beian
-        .css('opacity', 0)
         .find('img')
         .attr('src', beianImg);
-    $squares.css('opacity', 0);
-    $globalMenu.css('opacity', 0);
 
     function adjustSvgSize() {
         const $body = $('body'),

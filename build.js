@@ -263,7 +263,7 @@ commander
     .action(function () {
         var Quota = 1024 * 1024 * 1024; // 1GB
         log('# 设置流量配额上限...');
-        return new Promise.resolve()
+        return Promise.resolve()
             .then(function () {
                 log('  - 首先清除iptables OUTPUT规则...');
                 return execAsync('iptables', ['-F', 'OUTPUT']);

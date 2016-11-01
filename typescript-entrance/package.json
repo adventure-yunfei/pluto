@@ -1,4 +1,5 @@
 {
+  "private": true,
   "scripts": {
     "build": "rimraf build && DEV=false webpack",
     "build-dev": "DEV=true webpack -w -d",

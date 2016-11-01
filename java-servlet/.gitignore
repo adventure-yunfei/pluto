@@ -1,0 +1,7 @@
+# java build
+build/
+classes/
+# Web build: npm, scss, react-jsx
+/web/*/css/
+/web/*/js/jsx/
+/web/node_modules/

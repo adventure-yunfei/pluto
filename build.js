@@ -1,8 +1,7 @@
 var fs = require('fs'),
     child_process = require('child_process'),
-    Promise = require('bluebird'),
     commander = require('commander'),
-    _ = require('lodash'),
+    _ = require('underscore'),
     Mustache = require('mustache'),
     config = require('./config.json');
 
@@ -70,7 +69,7 @@ commander
                     return execAsync('npm', ['install']);
                 }).then(function () {
                     log('  - 编译文件...');
-                    return execAsync('gulp', []);
+                    return execAsync('npm', ['run', 'gulp']);
                 });
             })
             .then(function () {
@@ -88,7 +87,7 @@ commander
                     })
                     .then(function () {
                         log('  - 编译文件...');
-                        return execAsync('gulp', ['build', '-p']);
+                        return execAsync('npm', ['run', 'gulp', '---', 'build', '-p']);
                     });
             })
             .then(function () {
@@ -146,7 +145,7 @@ commander
                     .then(function () {
                         log('  - 启动 react 服务器...');
                         chdir(PROJ_ROOT + '/react');
-                        return execAsync('gulp', ['server', '-p']);
+                        return execAsync('npm', ['run', 'gulp', '--', 'server', '-p']);
                     })
                     .then(function () {
                         log('  - 启动 django uwsgi...');
@@ -175,7 +174,7 @@ commander
             .then(function () {
                 log('  - 停止 react 服务器...');
                 chdir(PROJ_ROOT + '/react');
-                return execAsync('gulp', ['stop-server']);
+                return execAsync('npm', ['run', 'gulp', '--', 'stop-server']);
             })
             .then(function () {
                 log('  - 停止 django uwsgi...');
@@ -264,7 +263,7 @@ commander
     .action(function () {
         var Quota = 1024 * 1024 * 1024; // 1GB
         log('# 设置流量配额上限...');
-        return new Promise.resolve()
+        return Promise.resolve()
             .then(function () {
                 log('  - 首先清除iptables OUTPUT规则...');
                 return execAsync('iptables', ['-F', 'OUTPUT']);

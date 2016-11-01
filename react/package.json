@@ -1,13 +1,16 @@
 {
   "name": "react-project",
+  "private": true,
   "version": "1.0.0",
   "files": [
     "lib",
     "bundles"
   ],
   "main": "lib/index.js",
-  "author": "yunfei",
-  "license": "MIT",
+  "author": "adventure-yunfei",
+  "scripts": {
+    "gulp": "gulp"
+  },
   "devDependencies": {
     "autoprefixer": "^6.3.3",
     "babel-eslint": "^5.0.0-beta6",

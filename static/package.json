@@ -4,10 +4,16 @@
   "private": true,
   "description": "",
   "author": "yunfei",
+  "scripts": {
+    "gulp": "gulp"
+  },
   "dependencies": {},
   "devDependencies": {
     "fs-extra": "^0.26.7",
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^3.1.1",
     "gulp-rename": "^1.2.2",
-    "gulp-replace": "^0.5.4"
+    "gulp-replace": "^0.5.4",
+    "gulp-sass": "^2.3.2"
   }
 }

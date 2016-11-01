@@ -24,14 +24,6 @@ typings/
 *.pyc
 *.pyo
 
-### java-servlet project ###
-# java build
-/java-servlet/build/
-/java-servlet/classes
-# Web build: npm, scss, react-jsx
-/java-servlet/web/*/css/
-/java-servlet/web/*/js/jsx/
-/java-servlet/web/node_modules/
 # build script
 /pluto-apache-config.conf
 /pluto-nginx-config

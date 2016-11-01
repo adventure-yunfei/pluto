@@ -12,7 +12,7 @@ summary:
 
 # 什么是 Virtual DOM 虚拟节点树技术？
 
-React风行一时，其核心技术 Virtual DOM 也引起关注。虽然 React（或是一些其他框架） 的 Virtual DOM 实现非常复杂，但实际上这项技术本身的原理很简单。
+React风行一时，其核心技术 Virtual DOM 也引起关注。虽然 React（或是一些其他框架） 的 Virtual DOM 实现非常复杂，但实际上这项技术本身的原理很简单。这篇文章来做个非常粗略的介绍。
 
 首先，Virtual DOM 是什么：
 
@@ -161,7 +161,7 @@ if (getType(oldVNode) === getType(newVNode)) {
 
 # Virtual DOM 真的有那么高效吗？
 
-React 宣称自己使用了 Virtual DOM，所以渲染效率很快。实际上除非合理使用，否则渲染效率反而可能下降，因为 Virtual DOM 的差异对比在大型应用中非常耗时。
+React 宣称自己使用了 Virtual DOM，所以渲染效率很快。实际上除非合理使用，否则渲染效率反而可能下降，<s>因为 Virtual DOM 的差异对比在大型应用中非常耗时。</s> (这一句存疑, Virtual DOM的算法原理上在实际环境中有限的DOM数里下不会带来明显的消耗, 应当是React作了过多的其他处理。)
 
 举个例子，假如 Virtual DOM 中有1000个节点，而用户仅仅只是在输入框里敲了一行字，如果直接更新实际DOM，消耗非常少，然而有了 Virtual DOM 之后，需要先对比整棵1000个节点的树之后再去更新输入框，拖性能后腿效果一流！
 

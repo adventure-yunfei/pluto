@@ -17,7 +17,7 @@ function execCmd(cmd) {
 
 
 function checkout(branch) {
-	return execCmd('git checkout ' + branch + ' 2>&1')
+	return execCmd('git checkout ' + branch)
 		.then(function (lines) {
 			if (lines.some(function (line) {
 				return line.indexOf('Aborting') !== -1;

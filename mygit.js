@@ -1,32 +1,20 @@
 /** require global package: "bluebird" */
 var Promise = require('bluebird');
 var child_process = require('child_process');
+var nodeExecCmd = require('node-exec-cmd');
 
-function log(msg) { console.log(msg); }
-function logCmd(cmd) {
-    console.log('# CMD # : ' + cmd);
+function execCmd(cmd) {
+	var toLines = function(output) {
+	    return !output ? [] : output.split('\n');
+	};
+	return nodeExecCmd(cmd)
+		.then(function (output) {
+			return toLines(output);
+		}, function (output) {
+			return Promise.reject(toLines(output));
+		});
 }
-function execCmd(cmd, noCmdLog, hasDetailLog) {
-    var toLines = function (output) {
-        return !output ? [] : output.split('\n');
-    };
-    var successData, errorData;
-    !noCmdLog && logCmd(cmd);
-    return new Promise(function (resolve, reject) {
-        var cp = child_process.exec(cmd, function (err, stdout, stderr) {
-            successData = stdout;
-            errorData = stderr;
-            if (err || stderr) {
-                reject({lines: toLines(stderr), error: err});
-                !err && console.error('# WARN # : stderr gets data but the process returns successfully!');
-            } else {
-                resolve(toLines(stdout));
-            }
-        });
-    }).finally(function () {
-        hasDetailLog && console.log(successData + '\n' + errorData);
-    });
-}
+
 
 function checkout(branch) {
 	return execCmd('git checkout ' + branch + ' 2>&1')
@@ -34,7 +22,7 @@ function checkout(branch) {
 			if (lines.some(function (line) {
 				return line.indexOf('Aborting') !== -1;
 			})) {
-				throw new Error(data);
+				return Promise.reject(lines);
 			}
 		});
 }
@@ -59,8 +47,8 @@ var actions = {
 			return skippedFiles;
 		};
 		return execCmd('git ls-files -v | grep "^S"')
-			.then(extractSkippedFiles, function (err) {
-				return err.lines.length ? Promise.reject(err) : extractSkippedFiles([]);
+			.then(extractSkippedFiles, function (lines) {
+				return lines.length ? Promise.reject(lines) : extractSkippedFiles([]);
 			});
 	},
 	'skip-worktree': function () {
@@ -127,7 +115,7 @@ if (act) {
 			.then(function () {
 				console.log('# Result # : CMD executed successfully!');
 			}, function (err) {
-				console.log(err);
+				console.log(err instanceof Array ? err.join('\n') : err);
 			});
 	});
 } else {

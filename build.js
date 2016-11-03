@@ -3,6 +3,7 @@ var fs = require('fs'),
     commander = require('commander'),
     _ = require('underscore'),
     Mustache = require('mustache'),
+    nodeExecCmd = require('node-exec-cmd'),
     config = require('./config.json');
 
 var PROJ_ROOT = __dirname,
@@ -14,26 +15,10 @@ function logCmd(cmd) {
     console.log('# CMD # : ' + cmd);
 }
 function execAsync(cmd, args, options) {
-    var showCmdLog = options && options.showCmdLog,
-        showDetailLog = options && options.showDetailLog,
-        runOnBackground = options && options.runOnBackground;
-    return new Promise(function (resolve, reject) {
-        showCmdLog && logCmd([cmd].concat(args).join(' '));
-        var cp = child_process.spawn(cmd, args, {
-            stdio: runOnBackground || !showDetailLog ? 'ignore' : 'inherit',
-            detached: !!runOnBackground
-        });
-        if (runOnBackground) {
-            cp.unref();
-            return resolve();
-        }
-        cp.on('close', function (code, signal) {
-            if (code === 0) {
-                resolve(signal);
-            } else {
-                reject(signal);
-            }
-        });
+    return nodeExecCmd([cmd].concat(args || []).join(' '), {
+        logCmd: !!options && !!options.showCmdLog,
+        logDetail: !!options && !!options.showDetailLog,
+        bg: !!options && !!options.runOnBackground
     });
 }
 function renderTemplateFile(filepath, context) {

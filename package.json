@@ -5,6 +5,7 @@
   "devDependencies": {
     "commander": "^2.8.1",
     "mustache": "^2.2.1",
+    "node-exec-cmd": "^0.1.1",
     "underscore": "^1.8.3"
   }
 }

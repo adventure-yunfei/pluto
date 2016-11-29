@@ -1,8 +1,9 @@
-var fs = require('fs'),
-    child_process = require('child_process'),
+var child_process = require('child_process'),
+    fs = require('fs-extra'),
     commander = require('commander'),
     _ = require('underscore'),
     Mustache = require('mustache'),
+    nodeExecCmd = require('node-exec-cmd'),
     config = require('./config.json');
 
 var PROJ_ROOT = __dirname,
@@ -14,26 +15,10 @@ function logCmd(cmd) {
     console.log('# CMD # : ' + cmd);
 }
 function execAsync(cmd, args, options) {
-    var showCmdLog = options && options.showCmdLog,
-        showDetailLog = options && options.showDetailLog,
-        runOnBackground = options && options.runOnBackground;
-    return new Promise(function (resolve, reject) {
-        showCmdLog && logCmd([cmd].concat(args).join(' '));
-        var cp = child_process.spawn(cmd, args, {
-            stdio: runOnBackground || !showDetailLog ? 'ignore' : 'inherit',
-            detached: !!runOnBackground
-        });
-        if (runOnBackground) {
-            cp.unref();
-            return resolve();
-        }
-        cp.on('close', function (code, signal) {
-            if (code === 0) {
-                resolve(signal);
-            } else {
-                reject(signal);
-            }
-        });
+    return nodeExecCmd([cmd].concat(args || []).join(' '), {
+        logCmd: !!options && !!options.showCmdLog,
+        logDetail: !!options && !!options.showDetailLog,
+        bg: !!options && !!options.runOnBackground
     });
 }
 function renderTemplateFile(filepath, context) {
@@ -100,6 +85,12 @@ commander
                     log('  - 编译文件...');
                     return execAsync('npm', ['run', 'build']);
                 });
+            })
+            .then(function () {
+                log('# 准备 root-domain-pages 资源...');
+                chdir(PROJ_ROOT);
+                fs.removeSync('root-domain-pages/ts-entry-static');
+                fs.copySync('typescript-entrance/build', 'root-domain-pages');
             })
 
             .then(function () {

@@ -5,6 +5,7 @@ var path = require('path'),
     globalConfig = require('../config.json'),
     ROOT_DIR = __dirname,
     isDev = process.env.DEV !== 'false';
+var STATIC_DIR = 'ts-entry-static'
 
 function makeStyleLoader (preCssLoader) {
     preCssLoader = preCssLoader ? ('!' + preCssLoader) : '';
@@ -24,7 +25,7 @@ module.exports = {
         index: path.resolve(ROOT_DIR, 'index.ts')
     },
     output: {
-        filename: makeFilename('static/[name].js'),
+        filename: makeFilename(STATIC_DIR+'/[name].js'),
         path: path.resolve(ROOT_DIR, 'build/'),
         publicPath: isDev ? path.resolve(ROOT_DIR, 'build') + '/' : '/'
     },
@@ -51,16 +52,16 @@ module.exports = {
             },
             {
                 test: /\.(jpeg|png|jpg)$/i,
-                loader: 'url?limit=10000&name=' + makeFilename('static/[path][name].[ext]')
+                loader: 'url?limit=10000&name=' + makeFilename(STATIC_DIR+'/[path][name].[ext]')
             },
             {
                 test: /\.(eot|woff2|woff|ttf)$/i,
-                loader: 'file-loader?name=' + (isDev ? 'static/[path][name].[ext]' : 'static/fonts/[name].[hash:6].[ext]')
+                loader: 'file-loader?name=' + (isDev ? STATIC_DIR+'/[path][name].[ext]' : STATIC_DIR+'/fonts/[name].[hash:6].[ext]')
             }
         ]
     },
     plugins: (isDev ? [] : [
-        new ExtractTextPlugin(makeFilename('static/[name].css')),
+        new ExtractTextPlugin(makeFilename(STATIC_DIR+'/[name].css')),
         new webpack.optimize.DedupePlugin(),
         new webpack.optimize.OccurenceOrderPlugin(),
         new webpack.optimize.UglifyJsPlugin({

@@ -29,3 +29,5 @@ typings/
 /pluto-nginx-config
 /django/djproj-uwsgi.ini
 /django/djproj-uwsgi.pid
+/root-domain-pages/ts-entry-static/
+/root-domain-pages/index.html

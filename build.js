@@ -1,5 +1,5 @@
-var fs = require('fs'),
-    child_process = require('child_process'),
+var child_process = require('child_process'),
+    fs = require('fs-extra'),
     commander = require('commander'),
     _ = require('underscore'),
     Mustache = require('mustache'),
@@ -85,6 +85,12 @@ commander
                     log('  - 编译文件...');
                     return execAsync('npm', ['run', 'build']);
                 });
+            })
+            .then(function () {
+                log('# 准备 root-domain-pages 资源...');
+                chdir(PROJ_ROOT);
+                fs.removeSync('root-domain-pages/ts-entry-static');
+                fs.copySync('typescript-entrance/build', 'root-domain-pages');
             })
 
             .then(function () {

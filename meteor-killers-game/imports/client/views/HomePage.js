@@ -3,44 +3,41 @@ import { Meteor } from 'meteor/meteor';
 import { createContainer } from 'meteor/react-meteor-data';
 import RoomsDB from '../../databases/RoomsDB';
 import EnumRoomStatus from '../../enums/EnumRoomStatus';
-import EnumPlayerRole from '../../enums/EnumPlayerRole';
+import PR, {PlayRoleLabels} from '../../enums/EnumPlayerRole';
+import { clearAllDBs } from '../../methods/AdminM';
 
+class NumberInput extends React.Component {
+    getValue() {
+        return this.state && parseInt(this.state.value, 10);
+    }
+    handleInputChange(e) {
+        const value = e.target.value || '0';
+        if (/^[0-9]+$/.test(value)) {
+            this.setState({value: value});
+        }
+    }
+    componentWillMount() {
+        this.setState({value: '0'});
+    }
+    render() {
+        return <input type="text" value={this.state && this.state.value} onChange={this.handleInputChange.bind(this)}/>;
+    }
+}
+
+const AVAILABLE_ROLES = [PR.Killer, PR.Villager, PR.Witch, PR.Predictor, PR.Hunter];
 export default class HomePage extends React.Component {
-    handleBtnClick() {
+    handleBtnClick = () => {
         const newRoomId = Math.floor(Math.random() * 10000).toString();
-        //RoomsDB.insert({
-        //    _id: newRoomId,
-        //    players: [{
-        //        uid: 'iT5Cz8KXZXXWgw7f4',
-        //        playerRole: EnumPlayerRole.Killer
-        //    }, {
-        //        uid: 'uyBvBqeRpd6uJqwxL',
-        //        playerRole: EnumPlayerRole.Killer
-        //    }, {
-        //        uid: 'rLQapdQ6mqWrfQPeJ',
-        //        playerRole: EnumPlayerRole.Witch
-        //    }, {
-        //        uid: 'HGYbfhfMnGWGKWpeA',
-        //        playerRole: EnumPlayerRole.Predictor
-        //    }, {
-        //        uid: 'QMArxKcEMBHbxHWtz',
-        //        playerRole: EnumPlayerRole.Villager
-        //    }, {
-        //        uid: '46rkb7ynqCntKburk',
-        //        playerRole: EnumPlayerRole.Villager
-        //    }, {
-        //        uid: 'eer769TED5k3kGzBZ',
-        //        playerRole: EnumPlayerRole.Villager
-        //    }],
-        //    roomStatus: EnumRoomStatus.Creating,
-        //    killersSelecting: []
-        //});
         RoomsDB.insert({
             _id: newRoomId,
-            roleCounts: [
-                {playerRole: EnumPlayerRole.Killer, count: 2},
-                {playerRole: EnumPlayerRole.Villager, count: 2}
-            ],
+            roleCounts: AVAILABLE_ROLES.reduce((result, playerRole) => {
+                const numInput = this.refs[`role-number-${playerRole}`],
+                    cnt = numInput && numInput.getValue() || 0;
+                if (cnt > 0) {
+                    result.push({playerRole: playerRole, count: cnt});
+                }
+                return result;
+            }, []),
             players: [],
             roomStatus: EnumRoomStatus.Creating,
             deadPlayerUids: [],
@@ -49,10 +46,29 @@ export default class HomePage extends React.Component {
         });
         this.props.router.push(`/room/${newRoomId}`);
     }
+
+    handleClearBtnClick = () => {
+        clearAllDBs.call({});
+    }
+
+    renderCheckbox(playerRole) {
+        return (
+            <label key={playerRole}>
+                {PlayRoleLabels[playerRole]}
+                <NumberInput ref={`role-number-${playerRole}`}/>
+            </label>
+        );
+    }
+
     render() {
         return (
             <div className="home-page">
-                <button onClick={this.handleBtnClick.bind(this)}>New Room</button>
+                {AVAILABLE_ROLES.map(this.renderCheckbox.bind(this))}
+                <button onClick={this.handleBtnClick}>新建房间</button>
+
+                <p>
+                    <button onClick={this.handleClearBtnClick}>清理</button>
+                </p>
             </div>
         );
     }

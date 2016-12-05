@@ -1,9 +1,9 @@
 import React from 'react';
-import {Route} from 'react-router';
-import TodosView from './TodosView';
+import { Route, IndexRoute } from 'react-router';
+import ChattingPage from './chatting-page/ChattingPage';
 
 export default (
     <Route path="/">
-        <Route path="todos" component={TodosView}/>
+        <IndexRoute component={ChattingPage}/>
     </Route>
 )

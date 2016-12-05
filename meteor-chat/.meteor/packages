@@ -22,3 +22,5 @@ react-meteor-data
 static-html
 aldeed:simple-schema
 aldeed:collection2
+accounts-password
+reywood:publish-composite

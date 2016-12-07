@@ -1,0 +1,23 @@
+{
+  "parser": "babel-eslint",
+  "plugins": [
+    "react"
+  ],
+  "extends": ["eslint:recommended", "plugin:react/recommended"],
+  "env": {
+    "browser": true
+  },
+  "globals": {
+  },
+  "rules": {
+    "no-unused-vars": ["error", {"args": "none"}],
+    "no-console": "off",
+    "eqeqeq": ["error", "allow-null"],
+    "no-mixed-spaces-and-tabs": "off",
+    "no-extra-boolean-cast": "off",
+    "react/display-name": "off",
+    "react/prop-types": "error",
+    "react/no-danger": "off",
+    "react/no-find-dom-node": "off"
+  }
+}

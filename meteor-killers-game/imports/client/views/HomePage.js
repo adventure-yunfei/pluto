@@ -1,6 +1,4 @@
-import React from 'react';
-import { Meteor } from 'meteor/meteor';
-import { createContainer } from 'meteor/react-meteor-data';
+import React, { PropTypes } from 'react';
 import RoomsDB from '../../databases/RoomsDB';
 import EnumRoomStatus from '../../enums/EnumRoomStatus';
 import PR, {PlayRoleLabels} from '../../enums/EnumPlayerRole';
@@ -26,6 +24,9 @@ class NumberInput extends React.Component {
 
 const AVAILABLE_ROLES = [PR.Killer, PR.Villager, PR.Witch, PR.Predictor, PR.Hunter];
 export default class HomePage extends React.Component {
+    static propTypes = {
+        router: PropTypes.object.isRequired
+    }
     handleBtnClick = () => {
         const newRoomId = Math.floor(Math.random() * 10000).toString();
         RoomsDB.insert({
@@ -38,11 +39,7 @@ export default class HomePage extends React.Component {
                 }
                 return result;
             }, []),
-            players: [],
-            roomStatus: EnumRoomStatus.Creating,
-            deadPlayerUids: [],
-            killersSelecting: [],
-            currentKilledUid: null
+            roomStatus: EnumRoomStatus.Creating
         });
         this.props.router.push(`/room/${newRoomId}`);
     }

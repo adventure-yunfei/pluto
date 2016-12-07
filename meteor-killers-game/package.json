@@ -2,6 +2,8 @@
   "name": "meteor-killers-game",
   "private": true,
   "scripts": {
+    "build": "meteor build ../meteor-killers-game-bundle/",
+    "build-for-linux64": "npm run build --loglevel=silent -- --architecture os.linux.x86_64",
     "start": "meteor run",
     "lint": "eslint client/ imports/ server/"
   },

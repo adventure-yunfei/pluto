@@ -31,3 +31,4 @@ typings/
 /django/djproj-uwsgi.pid
 /root-domain-pages/ts-entry-static/
 /root-domain-pages/index.html
+/release/

@@ -20,9 +20,10 @@
       "by_port": 12193,
       "by_domain": "react.yunfei.me"
     },
-    "killers-game": {
+    "killers_game": {
       "by_port": 12194,
-      "by_domain": "killers.yunfei.me"
+      "by_domain": "killers.yunfei.me",
+      "has_websocket": true
     }
   },
 

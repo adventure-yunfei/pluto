@@ -1,8 +1,8 @@
-import uniq from 'lodash/uniq';
 import random from 'lodash/random';
 import { Meteor } from 'meteor/meteor';
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
 import { ValidatedMethod } from 'meteor/mdg:validated-method';
+import R from 'ramda';
 import arrayToMap from '../utils/arrayToMap';
 import { getVoteResult } from '../utils/roomsUtils';
 import EnumRoomStatus from '../enums/EnumRoomStatus';
@@ -163,7 +163,7 @@ export const stepToNextStatus = new ValidatedMethod({
                 pushMessage('狼人正在谋划暗杀目标...');
                 break;
             case EnumRoomStatus.KillersKilling:
-                if (inNight.killersSelecting.length === getAliveCntOfRole(EnumPlayerRole.Killer) && uniq(inNight.killersSelecting.map(item => item.targetUid)).length === 1) {
+                if (inNight.killersSelecting.length === getAliveCntOfRole(EnumPlayerRole.Killer) && R.uniq(inNight.killersSelecting.map(item => item.targetUid)).length === 1) {
                     const hasWitch = getCntOfRole(EnumPlayerRole.Witch) > 0,
                         hasPredictor = getCntOfRole(EnumPlayerRole.Predictor) > 0,
                         killedUid = inNight.killersSelecting[0].targetUid;

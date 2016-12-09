@@ -1,7 +1,6 @@
 import React, {PropTypes} from 'react';
 import random from 'lodash/random';
-import uniq from 'lodash/uniq';
-import get from 'lodash/get';
+import R from 'ramda';
 import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
 import { createContainer } from 'meteor/react-meteor-data';
@@ -13,6 +12,8 @@ import RoomsDB from '../../databases/RoomsDB';
 import { joinRoom, stepToNextStatus, voteAgain, killerSelecting, killerConfirmPartner, voteIt, restartRoom } from '../../methods/roomsMethods';
 
 import './RoomPage.less';
+
+const findByUid = R.curry((uid, list) => R.find(R.propEq('uid', uid))(list));
 
 class MessageList extends React.Component {
     static propTypes = {
@@ -140,23 +141,6 @@ class RoomPage extends React.Component {
         }
     }
 
-    _buildRenderVariables() {
-        this._playerMap = {};
-        this._playerRoleMap = {};
-
-        const {players} = this.props;
-        if (players) {
-            const playerMap = this._playerMap,
-                playerRoleMap = this._playerRoleMap;
-            players.forEach(player => {
-                const {uid, playerRole} = player;
-                playerMap[uid] = player;
-                playerRoleMap[playerRole] = playerRoleMap[playerRole] || {};
-                playerRoleMap[playerRole][uid] = player;
-            });
-        }
-    }
-
     _resetTimerToNextStatus() {
         if (this._nextStatusTimer) {
             clearTimeout(this._nextStatusTimer);
@@ -164,8 +148,9 @@ class RoomPage extends React.Component {
         this._nextStatusTimer = setTimeout(() => this.stepToNextStatus(), 2000);
     }
     componentWillReceiveProps(nextProps) {
-        const nextStatus = get(nextProps, 'room.roomStatus');
-        if (nextStatus != null && nextStatus !== get(this.props, 'room.roomStatus')) {
+        const getStatus = R.view(R.lensPath(['room', 'roomStatus']));
+        const nextStatus = getStatus(nextProps);
+        if (nextStatus != null && nextStatus !== getStatus(this.props)) {
             // 切换状态时重置选择状态
             this.setState({
                 selectedPlayerUid: null
@@ -247,7 +232,7 @@ class RoomPage extends React.Component {
                 break;
             case EnumRoomStatus.KillersConfirmEachOther:
                 if (userPlayerRole === EnumPlayerRole.Killer) {
-                    const killerMap = this._playerRoleMap[EnumPlayerRole.Killer];
+                    const killerMap = _playerRoleMap[EnumPlayerRole.Killer];
                     renderPlayerItem = player => {
                         if (killerMap[player.uid] != null) {
                             return {className: 'selected-by-other'};
@@ -274,7 +259,7 @@ class RoomPage extends React.Component {
                         }
                     };
                     const tgtConfirmed = inNight.killersSelecting.length === getAliveOfRole(EnumPlayerRole.Killer).length &&
-                        uniq(inNight.killersSelecting.map(selInfo => selInfo.targetUid)).length === 1;
+                        R.uniq(inNight.killersSelecting.map(selInfo => selInfo.targetUid)).length === 1;
                     content.actions = <button disabled={!tgtConfirmed} onClick={() => this.stepToNextStatus()}>杀死目标 {!tgtConfirmed ? '(意见未统一)' : ''}</button>
                 }
                 break;
@@ -408,7 +393,6 @@ class RoomPage extends React.Component {
         // todo: debug
         window.Room = this;
 
-        this._buildRenderVariables();
         const {room, loading, currentPlayer} = this.props;
         if (loading) {
             return <div className="room-page">加载中...</div>;
@@ -447,7 +431,7 @@ export default createContainer((props) => {
             loggingIn: Meteor.loggingIn()
         };
     if (data.room) {
-        const playerUids = data.room.players.map(player => player.uid);
+        const playerUids = R.map(R.prop('uid'))(data.room.players);
         data.loading = !Meteor.subscribe('accounts.byIds', playerUids).ready() || data.loading;
         const users = Meteor.users.find({_id: {$in: playerUids}}).fetch(),
             userMap = arrayToMap(users, '_id');
@@ -460,7 +444,7 @@ export default createContainer((props) => {
                 playerRole: player.playerRole
             };
         });
-        data.currentPlayer = data.players.find(player => player.uid === data.currentUid);
+        data.currentPlayer = findByUid(data.currentUid)(data.players);
     }
 
     return data;

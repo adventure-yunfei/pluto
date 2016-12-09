@@ -1,4 +1,4 @@
-import map from 'lodash/map';
+import R from 'ramda';
 
 export function getVoteResult(roomVoting) {
     const beVotedUidCntMap = roomVoting.reduce((result, {uid, targetUid}) => {
@@ -7,9 +7,13 @@ export function getVoteResult(roomVoting) {
         }
         return result;
     }, {});
-    const voteRank = map(beVotedUidCntMap, (voteCnt, uid) => {
-        return {uid: uid, voteCount: voteCnt};
-    }).sort((a, b) => b.voteCount - a.voteCount);
+
+    const voteRank = R.compose(
+        R.sortBy(R.prop('voteCount')),
+        R.map(uid => ({uid: uid, voteCount: beVotedUidCntMap[uid]})),
+        R.keys
+    )(beVotedUidCntMap);
+
     let highestVotedUid = null;
     if (voteRank.length === 1 || (voteRank.length >= 2 && voteRank[0].voteCount > voteRank[1].voteCount)) {
         highestVotedUid = voteRank[0].uid;

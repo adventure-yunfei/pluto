@@ -39,8 +39,40 @@ function onMainCommandFailure(err) {
 function chdir(dir) {
     process.chdir(dir);
 }
+function getProp(obj, propPaths) {
+    var val = obj;
+    propPaths.some(function (key) {
+        if (typeof val === 'object') {
+            val = val[key];
+        } else {
+            return true;
+        }
+    });
+    return val;
+}
 
 var RELEASE_DIR = PROJ_ROOT + '/release';
+
+function checkConfigFile() {
+    var REQUIRED_CONFIG_KEYS = [
+        'default_domain',
+        //'blog.duoshuo',
+        //'blog.baiduAnalytics',
+        'django-photosite.baidu-access-key',
+        'django-photosite.baidu-secret-key',
+        'django-photosite.baiduAnalytics',
+        'react-photosite.baiduAnalytics'
+    ];
+    var missedKeys = REQUIRED_CONFIG_KEYS.filter(function (keyPath) {
+        return !getProp(config, keyPath.split('.'));
+    });
+    if (missedKeys.length) {
+        throw new Error('缺失必需的配置项: ' + missedKeys.join(' , '));
+    }
+}
+
+checkConfigFile();
+
 commander
     .command('build-release')
     .description('编译部分工程，打包成release包 (包含工程：meteor-killers-game)')
@@ -250,16 +282,6 @@ commander
         return Promise.resolve()
             .then(function () {
                 addConfigStr([
-                    '# Config for entrance:',
-                    'server {',
-                    '    listen      80;',
-                    '    root        ' + PROJ_ROOT + '/typescript-entrance/build;',
-                    '}',
-                    ''
-                ].join('\n'));
-            })
-            .then(function () {
-                addConfigStr([
                     '# Config for STATIC:',
                     'server {',
                     '    listen      ' + hosts.static.by_port + ';',
@@ -287,6 +309,22 @@ commander
                         return renderTemplateFile(templatesDir + '/domain-to-port-proxy', host).then(addConfigStr);
                     }
                 }));
+            })
+            .then(function () {
+                addConfigStr([
+                    '# Config for entrance:',
+                    'server {',
+                    '    listen      80;',
+                    '    server_name ' + config.default_domain + ';',
+                    '    root        ' + PROJ_ROOT + '/root-domain-pages;',
+                    '}',
+                    'server {',
+                    '    listen      80;',
+                    '    server_name *.yunfei.me;',
+                    '    return 301 $scheme://' + config.default_domain + '$request_uri;',
+                    '}',
+                    ''
+                ].join('\n'));
             })
             .then(function () {
                 fs.writeFileSync(outputFile, cfgStr);

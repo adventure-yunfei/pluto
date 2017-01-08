@@ -1,9 +1,6 @@
 {
   "__hosts": "每一项中, 'by_domain'指定域名访问方式, 'by_port'(如果有)指定端口访问方式, 'run_by_apache'指定由apache监听该端口",
   "hosts": {
-    "entrance": {
-      "by_domain": "yunfei.me"
-    },
     "static": {
       "by_port": 12190,
       "by_domain": "static.yunfei.me"
@@ -26,6 +23,8 @@
       "has_websocket": true
     }
   },
+
+  "default_domain": "yunfei.me",
 
   "__README__": "以下需要在部署环境手动指定",
   "blog": {

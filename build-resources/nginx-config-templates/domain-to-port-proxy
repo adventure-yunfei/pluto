@@ -6,7 +6,7 @@ server {
     listen      80;
     server_name {{&by_domain}};
     location / {
-        proxy_pass http://localhost:{{by_port}}/;
+        proxy_pass http://127.0.0.1:{{by_port}}/;
         {{#has_websocket}}
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;

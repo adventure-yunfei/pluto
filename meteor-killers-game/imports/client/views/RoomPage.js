@@ -137,20 +137,20 @@ class RoomPage extends React.Component {
 
     handleRestartClick = () => {
         if (confirm('确认重新开始游戏？')) {
-            restartRoom.call({room: this.props.room._id});
+            restartRoom.call({roomId: this.props.room._id});
         }
     }
 
-    _resetTimerToNextStatus() {
+    _resetTimerToNextStatus(timeout) {
         if (this._nextStatusTimer) {
             clearTimeout(this._nextStatusTimer);
         }
-        this._nextStatusTimer = setTimeout(() => this.stepToNextStatus(), 2000);
+        this._nextStatusTimer = setTimeout(() => this.stepToNextStatus(), timeout);
     }
-    componentWillReceiveProps(nextProps) {
+    checkAutoNextStatus(prevProps, nextProps) {
         const getStatus = R.view(R.lensPath(['room', 'roomStatus']));
         const nextStatus = getStatus(nextProps);
-        if (nextStatus != null && nextStatus !== getStatus(this.props)) {
+        if (nextStatus != null && nextStatus !== getStatus(prevProps)) {
             // 切换状态时重置选择状态
             this.setState({
                 selectedPlayerUid: null
@@ -175,6 +175,12 @@ class RoomPage extends React.Component {
                 this._resetTimerToNextStatus(autoNextInterval);
             }
         }
+    }
+    componentWillMount() {
+        this.checkAutoNextStatus({}, this.props);
+    }
+    componentWillReceiveProps(nextProps) {
+        this.checkAutoNextStatus(this.props, nextProps);
     }
 
     renderPlayerList(players, renderPlayerItem = null) {

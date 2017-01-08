@@ -6,23 +6,24 @@
     },
     "static": {
       "by_port": 12190,
-      "by_domain": "static.yunfei.me",
-      "run_by_apache": true
+      "by_domain": "static.yunfei.me"
     },
     "django": {
       "by_port": 12191,
-      "by_domain": "django.yunfei.me",
-      "run_by_apache": true
+      "by_domain": "django.yunfei.me"
     },
     "gitblog": {
       "by_port": 12192,
-      "by_domain": "blog.yunfei.me",
-      "run_by_apache": true
+      "by_domain": "blog.yunfei.me"
     },
     "react": {
       "by_port": 12193,
-      "by_domain": "react.yunfei.me",
-      "run_by_apache": false
+      "by_domain": "react.yunfei.me"
+    },
+    "killers_game": {
+      "by_port": 12194,
+      "by_domain": "killers.yunfei.me",
+      "has_websocket": true
     }
   },
 

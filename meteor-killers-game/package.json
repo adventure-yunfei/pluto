@@ -1,0 +1,26 @@
+{
+  "name": "meteor-killers-game",
+  "private": true,
+  "scripts": {
+    "build": "meteor build ../meteor-killers-game-bundle/",
+    "build-for-linux64": "npm run build --loglevel=silent -- --architecture os.linux.x86_64",
+    "start": "meteor run",
+    "lint": "eslint client/ imports/ server/"
+  },
+  "dependencies": {
+    "babel-runtime": "6.18.0",
+    "lodash": "^4.17.2",
+    "meteor-node-stubs": "~0.2.0",
+    "ramda": "^0.22.1",
+    "react": "^15.4.1",
+    "react-addons-pure-render-mixin": "^15.4.1",
+    "react-dom": "^15.4.1",
+    "react-router": "^3.0.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^7.1.1",
+    "babel-plugin-transform-class-properties": "^6.19.0",
+    "eslint": "^3.11.1",
+    "eslint-plugin-react": "^6.8.0"
+  }
+}

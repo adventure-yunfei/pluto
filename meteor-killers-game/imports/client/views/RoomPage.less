@@ -1,0 +1,22 @@
+.room-page {
+  .player-list {
+    .player-item {
+      &.selected-by-other {
+        background-color: lightgreen;
+      }
+
+      &.selected-by-me {
+        background-color: green;
+      }
+
+      &.dead-player {
+        background-color: red;
+      }
+    }
+  }
+
+  .message-list {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+}

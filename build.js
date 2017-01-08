@@ -40,10 +40,65 @@ function chdir(dir) {
     process.chdir(dir);
 }
 
+var RELEASE_DIR = PROJ_ROOT + '/release';
+commander
+    .command('build-release')
+    .description('编译部分工程，打包成release包 (包含工程：meteor-killers-game)')
+    .action(function () {
+        fs.emptyDirSync(RELEASE_DIR);
+        return Promise.resolve()
+            .then(() => {
+                log('# 编译 Meteor Killers Game 发布包...');
+                chdir(PROJ_ROOT + '/meteor-killers-game');
+                return Promise.resolve().then(function () {
+                    log('  - 安装npm包...');
+                    return execAsync('npm', ['install']);
+                }).then(function () {
+                    log('  - 编译meteor压缩包...');
+                    return execAsync('meteor', ['build', RELEASE_DIR + '/meteor-killers-game', '--architecture', 'os.linux.x86_64']);
+                });
+            });
+    });
 
 commander
-    .command('run')
-    .description('编译所有工程并启动服务器')
+    .command('postbuild-release')
+    .description('在release包的基础上，解压包，进行必要的再编译')
+    .action(function () {
+        return Promise.resolve()
+            .then(() => {
+                log('# 处理 Meteor Killers Game 发布包...');
+                chdir(RELEASE_DIR + '/meteor-killers-game');
+                return Promise.resolve().then(function () {
+                    log('  - 解压meteor压缩包...');
+                    return execAsync('tar', ['-xf', 'meteor-killers-game.tar.gz']);
+                }).then(function () {
+                    log('  - 安装meteor服务端依赖的npm包...');
+                    chdir('bundle/programs/server');
+                    return execAsync('npm', ['install', '--no-shrinkwrap']);
+                }).then(function () {
+                    log('  - 准备pm2启动配置文件...');
+                    chdir('../..');
+                    var killersHost = config.hosts.killers_game;
+                    fs.writeJSONSync('pm2-process.json', {
+                        apps: [{
+                            name: 'killers',
+                            script: 'main.js',
+                            env: {
+                                PORT: killersHost.by_port,
+                                ROOT_URL: 'http://' + killersHost.by_domain,
+                                MONGO_URL: 'mongodb://127.0.0.1:27017/killers-game'
+                            }
+                        }]
+                    });
+                });
+            })
+
+            .catch(onMainCommandFailure);
+    });
+
+commander
+    .command('build')
+    .description('本地编译工程')
     .action(function () {
         return Promise.resolve()
             .then(function () {
@@ -93,21 +148,6 @@ commander
                 fs.copySync('typescript-entrance/build', 'root-domain-pages');
             })
 
-            .then(function () {
-                chdir(PROJ_ROOT);
-                return execAsync('node', ['build.js', 'nginx-config'], {showDetailLog: true});
-            })
-
-            .then(function () {
-                chdir(PROJ_ROOT);
-                return execAsync('node', ['build.js', 'server'], {showDetailLog: true});
-            })
-
-            .then(function () {
-                chdir(PROJ_ROOT);
-                return execAsync('node', ['build.js', 'bandwidth'], {showDetailLog: true});
-            })
-
             .catch(onMainCommandFailure);
     });
 
@@ -134,9 +174,14 @@ commander
                         return execAsync('service', ['nginx', 'start']);
                     })
                     .then(function () {
-                        log('  - 启动 react 服务器...');
+                        log('  - 启动 pm2 - react 服务器...');
                         chdir(PROJ_ROOT + '/react');
                         return execAsync('npm', ['run', 'gulp', '--', 'server', '-p']);
+                    })
+                    .then(function () {
+                        log('  - 启动 pm2 - meteor killers game 服务器...');
+                        chdir(RELEASE_DIR + '/meteor-killers-game/bundle');
+                        return execAsync(PROJ_ROOT + '/node_modules/.bin/pm2', ['start', 'pm2-process.json']);
                     })
                     .then(function () {
                         log('  - 启动 django uwsgi...');
@@ -144,6 +189,12 @@ commander
                         return execAsync('uwsgi', ['--ini', uwsgi_ini_file, '--pidfile', uwsgi_pid_file], {runOnBackground: true});
                     });
             })
+
+            .then(function () {
+                chdir(PROJ_ROOT);
+                return execAsync('node', ['build.js', 'bandwidth'], {showDetailLog: true});
+            })
+
             .catch(onMainCommandFailure);
     });
 
@@ -163,10 +214,14 @@ commander
                 return execAsync('service', ['nginx', 'stop']);
             })
             .then(function () {
-                log('  - 停止 react 服务器...');
-                chdir(PROJ_ROOT + '/react');
-                return execAsync('npm', ['run', 'gulp', '--', 'stop-server']);
+                log('  - 停止 pm2 (react, meteor killers game) 服务器进程...');
+                return execAsync(PROJ_ROOT + '/node_modules/.bin/pm2', ['kill']);
             })
+            //.then(function () {
+            //    log('  - 停止 react 服务器...');
+            //    chdir(PROJ_ROOT + '/react');
+            //    return execAsync('npm', ['run', 'gulp', '--', 'stop-server']);
+            //})
             .then(function () {
                 log('  - 停止 django uwsgi...');
                 return Promise.resolve().then(function () {

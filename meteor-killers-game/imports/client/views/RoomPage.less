@@ -1,4 +1,6 @@
 .room-page {
+  padding: 16px;
+
   .player-list {
     .player-item {
       &.selected-by-other {
@@ -18,5 +20,30 @@
   .message-list {
     display: flex;
     flex-direction: column-reverse;
+  }
+
+  .restart-btn {
+    position: absolute;
+    bottom: 36px;
+    right: 0;
+    width: 80px;
+    z-index: 10;
+  }
+
+  .rich-user-name {
+    position: relative;
+    .apply-btn {
+      position: absolute !important;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      + .user-name-field {
+        border-left: 48px solid transparent;
+      }
+    }
+    .user-name-field {
+      font-size: inherit !important;
+      width: 100% !important;
+    }
   }
 }

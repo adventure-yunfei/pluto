@@ -71,8 +71,6 @@ function checkConfigFile() {
     }
 }
 
-checkConfigFile();
-
 commander
     .command('build-release')
     .description('编译部分工程，打包成release包 (包含工程：meteor-killers-game)')
@@ -97,6 +95,7 @@ commander
     .description('在release包的基础上，解压包，进行必要的再编译')
     .action(function () {
         return Promise.resolve()
+            .then(checkConfigFile)
             .then(() => {
                 log('# 处理 Meteor Killers Game 发布包...');
                 chdir(RELEASE_DIR + '/meteor-killers-game');
@@ -133,6 +132,7 @@ commander
     .description('本地编译工程')
     .action(function () {
         return Promise.resolve()
+            .then(checkConfigFile)
             .then(function () {
                 log('# 编译 STATIC 工程...');
                 chdir(PROJ_ROOT + '/static');
@@ -222,11 +222,6 @@ commander
                     });
             })
 
-            .then(function () {
-                chdir(PROJ_ROOT);
-                return execAsync('node', ['build.js', 'bandwidth'], {showDetailLog: true});
-            })
-
             .catch(onMainCommandFailure);
     });
 
@@ -280,6 +275,7 @@ commander
             };
 
         return Promise.resolve()
+            .then(checkConfigFile)
             .then(function () {
                 addConfigStr([
                     '# Config for STATIC:',

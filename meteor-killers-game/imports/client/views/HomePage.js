@@ -74,7 +74,7 @@ class HomePage extends React.Component {
     }
 
     handleClearBtnClick = () => {
-        clearAllDBs.call({});
+        clearAllDBs({});
     }
 
     renderCheckbox(playerRole) {

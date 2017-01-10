@@ -1,4 +1,5 @@
 import { Meteor } from 'meteor/meteor';
+import '../imports/setupPromise';
 import 'normalize.css';
 import 'purecss';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';

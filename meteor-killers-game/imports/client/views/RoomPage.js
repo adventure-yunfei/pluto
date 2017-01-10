@@ -66,7 +66,7 @@ class RichUserName extends React.Component {
     handleChangeConfirm = () => {
         const {uid} = this.props,
             {_name} = this.state;
-        changeUserName.call({uid: uid, newName: _name});
+        changeUserName({uid: uid, newName: _name});
     }
     render() {
         const {name} = this.props,
@@ -98,7 +98,7 @@ class RoomPage extends React.Component {
 
     stepToNextStatus(option = null) {
         const {room} = this.props;
-        stepToNextStatus.call({roomId: room._id, roomStatus: room.roomStatus, ...option});
+        stepToNextStatus({roomId: room._id, roomStatus: room.roomStatus, ...option});
     }
 
     handlePlayerItemClick = (e) => {
@@ -133,7 +133,7 @@ class RoomPage extends React.Component {
             switch (room.roomStatus) {
                 case EnumRoomStatus.KillersKilling:
                     if (currentPlayer.playerRole === EnumPlayerRole.Killer) {
-                        killerSelecting.call({
+                        killerSelecting({
                             roomId: room._id,
                             killerUid: currentPlayer.uid,
                             targetUid: targetUid
@@ -158,18 +158,18 @@ class RoomPage extends React.Component {
                     if (err) {
                         alert(err);
                     } else {
-                        joinRoom.call({roomId: room._id, uid: Meteor.userId()});
+                        joinRoom({roomId: room._id, uid: Meteor.userId()});
                     }
                 });
             } else {
-                joinRoom.call({roomId: room._id, uid: currentUid});
+                joinRoom({roomId: room._id, uid: currentUid});
             }
         }
     }
 
     handleRestartClick = () => {
         if (confirm('确认重新开始游戏？')) {
-            restartRoom.call({roomId: this.props.room._id});
+            restartRoom({roomId: this.props.room._id});
         }
     }
 
@@ -288,7 +288,7 @@ class RoomPage extends React.Component {
                     };
                     actionCfgs.push({
                         label: '我知道了',
-                        onClick: () => killerConfirmPartner.call({roomId: room._id, killerUid: currentPlayer.uid}),
+                        onClick: () => killerConfirmPartner({roomId: room._id, killerUid: currentPlayer.uid}),
                         disabled: inNight.partnerConfirmedKillerUids.indexOf(currentPlayer.uid) !== -1
                     });
                 }
@@ -379,8 +379,8 @@ class RoomPage extends React.Component {
                         }
                     };
                     actionCfgs.push(
-                        {label: '放弃', onClick: () => voteIt.call({roomId: room._id, uid: currentPlayer.uid, targetUid: null}), disabled: !!voteInfo},
-                        {label: `确认投票${!state.selectedPlayerUid?' (请选择)':''}`, onClick: () => state.selectedPlayerUid && voteIt.call({roomId: room._id, uid: currentPlayer.uid, targetUid: state.selectedPlayerUid}), disabled: !!voteInfo}
+                        {label: '放弃', onClick: () => voteIt({roomId: room._id, uid: currentPlayer.uid, targetUid: null}), disabled: !!voteInfo},
+                        {label: `确认投票${!state.selectedPlayerUid?' (请选择)':''}`, onClick: () => state.selectedPlayerUid && voteIt({roomId: room._id, uid: currentPlayer.uid, targetUid: state.selectedPlayerUid}), disabled: !!voteInfo}
                     );
                 }
                 break;
@@ -405,7 +405,7 @@ class RoomPage extends React.Component {
                         actionCfgs.push({label: '天黑请闭眼', onClick: stepNextHandler});
                     } else {
                         actionCfgs.push(
-                            {label: '重新投票', onClick: () => voteAgain.call({roomId: room._id})},
+                            {label: '重新投票', onClick: () => voteAgain({roomId: room._id})},
                             {label: '天黑请闭眼', onClick: () => this.stepToNextStatus()}
                         );
                     }

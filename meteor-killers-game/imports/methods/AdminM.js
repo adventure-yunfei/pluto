@@ -1,9 +1,9 @@
 import { Meteor } from 'meteor/meteor';
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
-import { ValidatedMethod } from 'meteor/mdg:validated-method';
 import RoomsDB from '../databases/RoomsDB';
+import createMethod from '../utils/createMethod';
 
-export const clearAllDBs = new ValidatedMethod({
+export const clearAllDBs = createMethod({
     name: 'admin.clearAllDBs',
     validate: new SimpleSchema({}).validator(),
     run() {

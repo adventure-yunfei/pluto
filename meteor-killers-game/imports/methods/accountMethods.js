@@ -1,8 +1,8 @@
 import { Meteor } from 'meteor/meteor';
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
-import { ValidatedMethod } from 'meteor/mdg:validated-method';
+import createMethod from '../utils/createMethod';
 
-export const changeUserName = new ValidatedMethod({
+export const changeUserName = createMethod({
     name: 'accounts.changeUserName',
     validate: new SimpleSchema({
         uid: {type: String},

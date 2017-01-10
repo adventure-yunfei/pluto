@@ -1,13 +1,13 @@
 import random from 'lodash/random';
 import { Meteor } from 'meteor/meteor';
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
-import { ValidatedMethod } from 'meteor/mdg:validated-method';
 import R from 'ramda';
 import arrayToMap from '../utils/arrayToMap';
 import { getVoteResult } from '../utils/roomsUtils';
 import EnumRoomStatus from '../enums/EnumRoomStatus';
 import EnumPlayerRole from '../enums/EnumPlayerRole';
 import RoomsDB from '../databases/RoomsDB';
+import createMethod from '../utils/createMethod';
 
 function shouldGetRoom(roomId) {
     const room = RoomsDB.findOne({_id: roomId});
@@ -17,7 +17,7 @@ function shouldGetRoom(roomId) {
     return room;
 }
 
-export const joinRoom = new ValidatedMethod({
+export const joinRoom = createMethod({
     name: 'rooms.join',
     validate: new SimpleSchema({
         roomId: {type: String},
@@ -41,7 +41,7 @@ export const joinRoom = new ValidatedMethod({
     }
 });
 
-export const stepToNextStatus = new ValidatedMethod({
+export const stepToNextStatus = createMethod({
     name: 'rooms.nextStatus',
     validate: new SimpleSchema({
         roomId: {type: String},
@@ -255,7 +255,7 @@ export const stepToNextStatus = new ValidatedMethod({
     }
 });
 
-export const voteAgain = new ValidatedMethod({
+export const voteAgain = createMethod({
     name: 'rooms.voteAgain',
     validate: new SimpleSchema({
         roomId: {type: String}
@@ -275,7 +275,7 @@ export const voteAgain = new ValidatedMethod({
     }
 });
 
-export const killerSelecting = new ValidatedMethod({
+export const killerSelecting = createMethod({
     name: 'rooms.killerSelecting',
     validate: new SimpleSchema({
         roomId: {type: String},
@@ -308,7 +308,7 @@ export const killerSelecting = new ValidatedMethod({
     }
 });
 
-export const killerConfirmPartner = new ValidatedMethod({
+export const killerConfirmPartner = createMethod({
     name: 'rooms.killerConfirmPartner',
     validate: new SimpleSchema({
         roomId: {type: String},
@@ -321,12 +321,12 @@ export const killerConfirmPartner = new ValidatedMethod({
         const room = shouldGetRoom(roomId);
         // 全都确认后，进入下一步
         if (room.players.filter(p => p.playerRole === EnumPlayerRole.Killer).every(p => room.inNight.partnerConfirmedKillerUids.indexOf(p.uid) !== -1)) {
-            stepToNextStatus.call({roomId: roomId, roomStatus: room.roomStatus});
+            stepToNextStatus({roomId: roomId, roomStatus: room.roomStatus});
         }
     }
 });
 
-export const voteIt = new ValidatedMethod({
+export const voteIt = createMethod({
     name: 'rooms.voteIt',
     validate: new SimpleSchema({
         roomId: {type: String},
@@ -341,12 +341,12 @@ export const voteIt = new ValidatedMethod({
             $addToSet: {voting: {uid, targetUid}}
         });
         if (room.voting.length + 1 >= (room.players.length - room.deaths.length)) {
-            stepToNextStatus.call({roomId: roomId, roomStatus: room.roomStatus});
+            stepToNextStatus({roomId: roomId, roomStatus: room.roomStatus});
         }
     }
 });
 
-export const restartRoom = new ValidatedMethod({
+export const restartRoom = createMethod({
     name: 'rooms.restartRoom',
     validate: new SimpleSchema({
         roomId: {type: String}

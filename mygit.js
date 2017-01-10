@@ -40,13 +40,15 @@ var actions = {
 	// 获取不监听改动的文件列表
 	'get-skip-worktree': function () {
 		var extractSkippedFiles = function (outputLines) {
-			var skippedFiles = removeEmpty(outputLines.map(function (line) {
+                        var skippedFiles = removeEmpty(outputLines.filter(function (line) {
+				return /^S/.test(line);
+			}).map(function (line) {
 				return line.replace(/^S/, '').trim();
 			}));
 			console.log(['# Skipped files:'].concat(skippedFiles.length ? skippedFiles : ['EMPTY']).join('\n  - '));
 			return skippedFiles;
 		};
-		return execCmd('git ls-files -v | grep "^S"')
+		return execCmd('git ls-files -v')
 			.then(extractSkippedFiles, function (lines) {
 				return lines.length ? Promise.reject(lines) : extractSkippedFiles([]);
 			});

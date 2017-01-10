@@ -9,6 +9,7 @@ import '../imports/databases/server/AccountsPublish';
 // Imports all methods that client uses.
 import '../imports/methods/AdminM';
 import '../imports/methods/roomsMethods';
+import '../imports/methods/accountMethods';
 
 Meteor.startup(() => {
   // code to run on server at startup

@@ -182,10 +182,12 @@ export const stepToNextStatus = new ValidatedMethod({
                 }
                 break;
             case EnumRoomStatus.PredictorChecking:
-                if (!targetUid) { throw new Meteor.Error('请选择你要查看身份的目标'); }
-                if (_playerMap[targetUid] == null) { throw new Meteor.Error('要查看身份的目标玩家不在房间内'); }
-                if (_deadUidMap[targetUid] != null) { throw new Meteor.Error('要查看身份的目标玩家已死亡'); }
-                pushMessage(`预言家查看了 *${getPlayerNames([targetUid])}* 的身份，TA *${_playerMap[targetUid].playerRole === EnumPlayerRole.Killer ? '是' : '不是'}* 狼人`, {visibleRoles: [EnumPlayerRole.Predictor]});
+                if (getAliveCntOfRole(EnumPlayerRole.Predictor) > 0) {
+                    if (!targetUid) { throw new Meteor.Error('请选择你要查看身份的目标'); }
+                    if (_playerMap[targetUid] == null) { throw new Meteor.Error('要查看身份的目标玩家不在房间内'); }
+                    if (_deadUidMap[targetUid] != null) { throw new Meteor.Error('要查看身份的目标玩家已死亡'); }
+                    pushMessage(`预言家查看了 *${getPlayerNames([targetUid])}* 的身份，TA *${_playerMap[targetUid].playerRole === EnumPlayerRole.Killer ? '是' : '不是'}* 狼人`, {visibleRoles: [EnumPlayerRole.Predictor]});
+                }
                 if (getCntOfRole(EnumPlayerRole.Witch) > 0 /*有女巫*/) {
                     updateRoom({roomStatus: EnumRoomStatus.WitchCuring});
                     pushMessage('女巫正在摆弄她的两瓶药水...');
@@ -194,7 +196,7 @@ export const stepToNextStatus = new ValidatedMethod({
                 }
                 break;
             case EnumRoomStatus.WitchCuring:
-                if (targetUid) {
+                if (getAliveCntOfRole(EnumPlayerRole.Witch) > 0 && targetUid) {
                     if (!room.witch.hasCure) { throw new Meteor.Error('女巫的解药已经用完'); }
                     if (targetUid !== inNight.killedUid) { throw new Meteor.Error('女巫使用解药指定了一个无效的目标'); }
                     pushMessage(`女巫使用解药救活了 *${getPlayerNames([targetUid])}*`, {visibleRoles: [EnumPlayerRole.Witch]});
@@ -208,7 +210,7 @@ export const stepToNextStatus = new ValidatedMethod({
                 }
                 break;
             case EnumRoomStatus.WitchPosioning:
-                if (targetUid) {
+                if (getAliveCntOfRole(EnumPlayerRole.Witch) > 0 && targetUid) {
                     if (!room.witch.hasPoison) { throw new Meteor.Error('女巫的毒药已经用完'); }
                     if (targetUid === inNight.killedUid && !inNight.cured) { throw new Meteor.Error('女巫使不能对已被狼人杀死的人使用毒药'); }
                     pushMessage(`女巫使用毒药毒死了了 *${getPlayerNames([targetUid])}*`, {visibleRoles: [EnumPlayerRole.Witch]});

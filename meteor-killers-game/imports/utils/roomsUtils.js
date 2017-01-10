@@ -9,6 +9,7 @@ export function getVoteResult(roomVoting) {
     }, {});
 
     const voteRank = R.compose(
+        R.reverse,
         R.sortBy(R.prop('voteCount')),
         R.map(uid => ({uid: uid, voteCount: beVotedUidCntMap[uid]})),
         R.keys

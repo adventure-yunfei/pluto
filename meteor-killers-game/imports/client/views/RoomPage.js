@@ -1,15 +1,20 @@
-import React, {PropTypes} from 'react';
-import random from 'lodash/random';
-import R from 'ramda';
-import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
 import { createContainer } from 'meteor/react-meteor-data';
+import React, {PropTypes} from 'react';
+import DocumentTitle from 'react-document-title';
+import R from 'ramda';
+import { Meteor } from 'meteor/meteor';
+import RaisedButton from 'material-ui/RaisedButton';
+import IconButton from 'material-ui/IconButton';
+import TextField from 'material-ui/TextField';
+import IconDone from 'material-ui/svg-icons/action/done';
 import arrayToMap from '../../utils/arrayToMap';
 import { getVoteResult } from '../../utils/roomsUtils';
 import EnumRoomStatus from '../../enums/EnumRoomStatus';
 import EnumPlayerRole, { PlayRoleLabels } from '../../enums/EnumPlayerRole';
 import RoomsDB from '../../databases/RoomsDB';
 import { joinRoom, stepToNextStatus, voteAgain, killerSelecting, killerConfirmPartner, voteIt, restartRoom } from '../../methods/roomsMethods';
+import { changeUserName } from '../../methods/accountMethods';
 
 import './RoomPage.less';
 
@@ -50,8 +55,35 @@ class MessageList extends React.Component {
     }
 }
 
+class RichUserName extends React.Component {
+    static propTypes = {
+        uid: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired
+    }
+    componentWillMount() {
+        this.setState({_name: this.props.name});
+    }
+    handleChangeConfirm = () => {
+        const {uid} = this.props,
+            {_name} = this.state;
+        changeUserName.call({uid: uid, newName: _name});
+    }
+    render() {
+        const {name} = this.props,
+            {_name} = this.state,
+            changed = name !== _name;
+        return (
+            <div className="rich-user-name">
+                {changed && <IconButton className="apply-btn" onClick={this.handleChangeConfirm}><IconDone color="rgb(0, 188, 212)"/></IconButton>}
+                <TextField className="user-name-field" name="rich-user-name" value={_name} onChange={e => this.setState({_name: e.target.value})}/>
+            </div>
+        );
+    }
+}
+
 class RoomPage extends React.Component {
     static propTypes = {
+        roomId: PropTypes.string.isRequired,
         room: PropTypes.object,
         players: PropTypes.array,
         currentPlayer: PropTypes.object,
@@ -120,7 +152,7 @@ class RoomPage extends React.Component {
                     username: Meteor.uuid(),
                     password: Meteor.uuid(),
                     profile: {
-                        displayName: '游客-' + random(100, 9999)
+                        displayName: '游客-' + (room.players.length + 1)
                     }
                 }, err => {
                     if (err) {
@@ -205,6 +237,7 @@ class RoomPage extends React.Component {
             state = this.state,
             {inNight} = room,
             isFirstPlayer = currentPlayer.uid === players[0].uid,
+            _playerMap = arrayToMap(players, 'uid'),
             _deadUidMap = arrayToMap(room.deaths, 'uid'),
             _playerRoleMap = players.reduce((result, player) => {
                 const {playerRole} = player;
@@ -214,59 +247,76 @@ class RoomPage extends React.Component {
             }, {}),
             isAlive = (uid = currentPlayer.uid) => _deadUidMap[uid] == null,
             getAliveOfRole = playerRole => (_playerRoleMap[playerRole] || []).filter(player => isAlive(player.uid)),
+            stepNextHandler = () => this.stepToNextStatus(),
             userPlayerRole = currentPlayer.playerRole,
             content = {
                 playerList: null,
                 actions: null
             };
-        let renderPlayerItem = null;
+        let renderPlayerItem = null,
+            actionCfgs = [];
+        if (isFirstPlayer) {
+            actionCfgs.push({label: '重新开始', onClick: this.handleRestartClick, primary: false, backgroundColor: 'rgb(232, 232, 232)'});
+        }
         switch (room.roomStatus) {
             case EnumRoomStatus.Creating:
                 if (isFirstPlayer) {
-                    content.actions = <button onClick={() => this.stepToNextStatus()}>开始游戏</button>;
+                    const expectedPlayerCnt = R.compose(
+                        R.sum,
+                        R.map(R.prop('count'))
+                    )(room.roleCounts);
+                    actionCfgs.push({label: '开始游戏', onClick: stepNextHandler, disabled: players.length !== expectedPlayerCnt});
                 }
                 break;
             case EnumRoomStatus.Created:
                 if (isFirstPlayer) {
-                    content.actions = <button onClick={() => this.stepToNextStatus()}>天黑请闭眼</button>;
+                    actionCfgs.push({label: '天黑请闭眼', onClick: stepNextHandler});
                 }
                 break;
             case EnumRoomStatus.Sunrise:
                 if (isFirstPlayer) {
-                    content.actions = <button onClick={() => this.stepToNextStatus()}>开始投票</button>;
+                    actionCfgs.push({label: '开始投票', onClick: stepNextHandler});
                 }
                 break;
             case EnumRoomStatus.KillersConfirmEachOther:
                 if (userPlayerRole === EnumPlayerRole.Killer) {
-                    const killerMap = _playerRoleMap[EnumPlayerRole.Killer];
+                    const killerMap = arrayToMap(_playerRoleMap[EnumPlayerRole.Killer], 'uid');
                     renderPlayerItem = player => {
                         if (killerMap[player.uid] != null) {
-                            return {className: 'selected-by-other'};
+                            return {className: 'selected-by-other', content: ' (狼人)'};
                         }
                     };
-                    content.actions = (
-                        <button disabled={inNight.partnerConfirmedKillerUids.indexOf(currentPlayer.uid) !== -1}
-                                onClick={() => killerConfirmPartner.call({roomId: room._id, killerUid: currentPlayer.uid})}>
-                            我知道了
-                        </button>
-                    );
+                    actionCfgs.push({
+                        label: '我知道了',
+                        onClick: () => killerConfirmPartner.call({roomId: room._id, killerUid: currentPlayer.uid}),
+                        disabled: inNight.partnerConfirmedKillerUids.indexOf(currentPlayer.uid) !== -1
+                    });
                 }
                 break;
             case EnumRoomStatus.KillersKilling:
                 if (isAlive() && userPlayerRole === EnumPlayerRole.Killer) {
-                    const myUid = currentPlayer.uid,
-                        killerTargetByMap = arrayToMap(inNight.killersSelecting, 'targetUid', 'killerUid');
+                    const killerTargetByMap = inNight.killersSelecting.reduce((result, {targetUid, killerUid}) => {
+                            result[targetUid] = result[targetUid] || [];
+                            result[targetUid].push(_playerMap[killerUid]);
+                            return result;
+                        }, {});
                     renderPlayerItem = player => {
-                        const targetByKillerUid = killerTargetByMap[player.uid];
-                        if (targetByKillerUid != null) {
+                        const targetByKillers = killerTargetByMap[player.uid];
+                        if (targetByKillers && targetByKillers.length) {
                             return {
-                                className: targetByKillerUid === myUid ? 'selected-by-me' : 'selected-by-other'
+                                className: 'selected-by-other',
+                                content: ` (被 ${targetByKillers.map(killer=>killer.displayName).join(', ')} 选择)`
                             };
                         }
                     };
-                    const tgtConfirmed = inNight.killersSelecting.length === getAliveOfRole(EnumPlayerRole.Killer).length &&
-                        R.uniq(inNight.killersSelecting.map(selInfo => selInfo.targetUid)).length === 1;
-                    content.actions = <button disabled={!tgtConfirmed} onClick={() => this.stepToNextStatus()}>杀死目标 {!tgtConfirmed ? '(意见未统一)' : ''}</button>
+                    const hasTgtSelected = inNight.killersSelecting.length > 0,
+                        tgtConfirmed = inNight.killersSelecting.length === getAliveOfRole(EnumPlayerRole.Killer).length &&
+                            R.uniq(inNight.killersSelecting.map(selInfo => selInfo.targetUid)).length === 1;
+                    actionCfgs.push({
+                        label: `杀死目标 ${!hasTgtSelected ? ' (请选择目标)' : (!tgtConfirmed ? ' (意见未统一)' : '')}`,
+                        onClick: stepNextHandler,
+                        disabled: !tgtConfirmed
+                    });
                 }
                 break;
             case EnumRoomStatus.PredictorChecking:
@@ -283,7 +333,7 @@ class RoomPage extends React.Component {
                             this.stepToNextStatus({targetUid: state.selectedPlayerUid});
                         }
                     }
-                    content.actions = <button disabled={!state.selectedPlayerUid} onClick={handler}>查看身份</button>;
+                    actionCfgs.push({label: `查看身份${!state.selectedPlayerUid ? '(请选择目标)':''}`, onClick: handler, disabled: !state.selectedPlayerUid});
                 }
                 break;
             case EnumRoomStatus.WitchCuring:
@@ -294,14 +344,12 @@ class RoomPage extends React.Component {
                         }
                     };
                     if (room.witch.hasCure) {
-                        content.actions = (
-                            <div>
-                                <button onClick={() => this.stepToNextStatus({targetUid: inNight.killedUid})}>救</button>
-                                <button onClick={() => this.stepToNextStatus()}>不救</button>
-                            </div>
+                        actionCfgs.push(
+                            {label: '不救', onClick: stepNextHandler},
+                            {label: '救', onClick: () => this.stepToNextStatus({targetUid: inNight.killedUid})}
                         );
                     } else {
-                        content.actions = <button disabled={true}>没有解药了</button>
+                        actionCfgs.push({label: '没有解药了', disabled: true});
                     }
                 }
                 break;
@@ -313,14 +361,12 @@ class RoomPage extends React.Component {
                         }
                     };
                     if (room.witch.hasPoison) {
-                        content.actions = (
-                            <div>
-                                <button disabled={!state.selectedPlayerUid} onClick={() => this.stepToNextStatus({targetUid: state.selectedPlayerUid})}>用毒药</button>
-                                <button onClick={() => this.stepToNextStatus()}>不用毒药</button>
-                            </div>
+                        actionCfgs.push(
+                            {label: '不用毒药', onClick: stepNextHandler},
+                            {label: '用毒药', onClick: () => this.stepToNextStatus({targetUid: state.selectedPlayerUid}), disabled: !state.selectedPlayerUid}
                         );
                     } else {
-                        content.actions = <button disabled={true}>没有毒药了</button>
+                        actionCfgs.push({label: '没有毒药了', disabled: true});
                     }
                 }
                 break;
@@ -332,17 +378,9 @@ class RoomPage extends React.Component {
                             return {className: 'selected-by-me'};
                         }
                     };
-                    content.actions = (
-                        <div>
-                            <button disabled={!!voteInfo}
-                                    onClick={() => state.selectedPlayerUid && voteIt.call({roomId: room._id, uid: currentPlayer.uid, targetUid: state.selectedPlayerUid})}>
-                                确认投票
-                            </button>
-                            <button disabled={!!voteInfo}
-                                    onClick={() => voteIt.call({roomId: room._id, uid: currentPlayer.uid, targetUid: null})}>
-                                    放弃
-                            </button>
-                        </div>
+                    actionCfgs.push(
+                        {label: '放弃', onClick: () => voteIt.call({roomId: room._id, uid: currentPlayer.uid, targetUid: null}), disabled: !!voteInfo},
+                        {label: `确认投票${!state.selectedPlayerUid?' (请选择)':''}`, onClick: () => state.selectedPlayerUid && voteIt.call({roomId: room._id, uid: currentPlayer.uid, targetUid: state.selectedPlayerUid}), disabled: !!voteInfo}
                     );
                 }
                 break;
@@ -352,21 +390,39 @@ class RoomPage extends React.Component {
                 renderPlayerItem = player => {
                     const beVotedCnt = votedCountMap[player.uid];
                     if (beVotedCnt != null) {
-                        return {className: `be-voted ${highestVotedUid === player.uid ? 'voted-dead' : ''}`, content: `${beVotedCnt}票`};
+                        const voteSourceNames = room.voting
+                            .filter(item => item.targetUid === player.uid)
+                            .map(item => _playerMap[item.uid].displayName)
+                            .join(', ');
+                        return {
+                            className: `be-voted ${highestVotedUid === player.uid ? 'voted-dead' : ''}`,
+                            content: `共${beVotedCnt}票 (${voteSourceNames})`
+                        };
                     }
                 };
                 if (isFirstPlayer) {
-                    content.actions = (
-                        <div>
-                            {!highestVotedUid && <button onClick={() => voteAgain.call({roomId: room._id})}>重新投票</button>}
-                            <button onClick={() => this.stepToNextStatus()}>天黑请闭眼</button>
-                        </div>
-                    );
+                    if (highestVotedUid) {
+                        actionCfgs.push({label: '天黑请闭眼', onClick: stepNextHandler});
+                    } else {
+                        actionCfgs.push(
+                            {label: '重新投票', onClick: () => voteAgain.call({roomId: room._id})},
+                            {label: '天黑请闭眼', onClick: () => this.stepToNextStatus()}
+                        );
+                    }
                 }
             }
         }
 
+        const lastActCfg = R.last(actionCfgs);
+        if (lastActCfg && lastActCfg.primary == null) {
+            lastActCfg.primary = true;
+        }
         content.playerList = this.renderPlayerList(players, renderPlayerItem);
+        content.actions = (
+            <div className="bottom-nav pure-g">
+                {actionCfgs.map((cfg, idx) => <RaisedButton className={`pure-u-1-${actionCfgs.length}`} key={`${room.roomStatus}-${idx}`} {...cfg}/>)}
+            </div>
+        );
         return content;
     }
     renderRoomHeader() {
@@ -390,29 +446,27 @@ class RoomPage extends React.Component {
             };
         return (
             <div className="room-header">
-                <h1>{room._id}</h1>
                 <h2>{getStatusDesc()}</h2>
             </div>
         );
     }
     render() {
-        // todo: debug
-        window.Room = this;
-
-        const {room, loading, currentPlayer} = this.props;
+        const {roomId, room, loading, currentPlayer} = this.props;
+        let pg = null;
         if (loading) {
-            return <div className="room-page">加载中...</div>;
+            pg = <div className="room-page">加载中...</div>;
         } else if (!room) {
-            return <div className="room-page">房间不存在</div>;
+            pg = <div className="room-page">房间不存在</div>;
         } else if (!currentPlayer) {
-            return <div className="room-page">你不在这个房间里 <button onClick={this.handleJoinRoomClick}>点击加入</button></div>;
+            pg = <div className="room-page" style={{textAlign: 'center'}}><span style={{lineHeight: '300px'}}>你不在这个房间里</span><RaisedButton className="bottom-nav" onClick={this.handleJoinRoomClick} label="点击加入" primary={true}/></div>;
         } else {
-            const isFirstPlayer = room.players[0].uid === currentPlayer.uid,
-                content = this.buildContent();
-            return (
+            const content = this.buildContent();
+            pg = (
                 <div className="room-page">
-                    <h3>{currentPlayer.displayName}, 你的身份是: {PlayRoleLabels[currentPlayer.playerRole]}</h3>
-                    {isFirstPlayer && <button onClick={this.handleRestartClick}>重新开始</button>}
+                    <h3>
+                        <RichUserName uid={currentPlayer.uid} name={currentPlayer.displayName}/>
+                        你的身份是: {PlayRoleLabels[currentPlayer.playerRole]}
+                    </h3>
                     {this.renderRoomHeader()}
                     {content.playerList}
                     {content.actions}
@@ -421,17 +475,15 @@ class RoomPage extends React.Component {
                 </div>
             );
         }
+        return <DocumentTitle title={`房间号: ${roomId}`}>{pg}</DocumentTitle>;
     }
 }
-
-// TODO: debug
-Meteor.subscribe('accounts.all');
-window.RoomsDB = RoomsDB;
 
 export default createContainer((props) => {
     const roomId = props.params.roomId,
         data = {
             loading: !Meteor.subscribe('rooms.byId', roomId).ready(),
+            roomId: roomId,
             room: RoomsDB.findOne({_id: roomId}),
             currentUid: Meteor.userId(),
             loggingIn: Meteor.loggingIn()

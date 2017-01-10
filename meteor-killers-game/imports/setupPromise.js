@@ -25,7 +25,9 @@ Promise.prototype.finally = (function () {
 window.onunhandledrejection = event => {
     const {reason} = event;
     let errMsg = '';
-    if (typeof reason.error === 'string') {
+    if (typeof reason === 'string') {
+        errMsg = reason;
+    } else if (typeof reason.error === 'string') {
         errMsg = reason.error 
     } else if (typeof reason.reason === 'string') {
         errMsg = reason.reason;

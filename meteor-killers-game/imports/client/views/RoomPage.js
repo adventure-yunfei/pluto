@@ -10,6 +10,7 @@ import TextField from 'material-ui/TextField';
 import IconDone from 'material-ui/svg-icons/action/done';
 import arrayToMap from '../../utils/arrayToMap';
 import { getVoteResult } from '../../utils/roomsUtils';
+import { pushAudioPlay } from '../client-utils/AudioPlayUtils';
 import EnumRoomStatus from '../../enums/EnumRoomStatus';
 import EnumPlayerRole, { PlayRoleLabels } from '../../enums/EnumPlayerRole';
 import RoomsDB from '../../databases/RoomsDB';
@@ -179,22 +180,25 @@ class RoomPage extends React.Component {
         }
         this._nextStatusTimer = setTimeout(() => this.stepToNextStatus(), timeout);
     }
-    checkAutoNextStatus(prevProps, nextProps) {
-        const getStatus = R.view(R.lensPath(['room', 'roomStatus']));
-        const nextStatus = getStatus(nextProps);
-        if (nextStatus != null && nextStatus !== getStatus(prevProps)) {
+    onGetProps(prevProps, nextProps) {
+        const getStatus = R.view(R.lensPath(['room', 'roomStatus'])),
+            prevStatus = getStatus(prevProps),
+            nextStatus = getStatus(nextProps);
+        if (nextStatus != null && nextStatus !== prevStatus) {
             // 切换状态时重置选择状态
             this.setState({
                 selectedPlayerUid: null
             });
             const isFirstPlayer = nextProps.room.players.length && nextProps.currentUid === nextProps.room.players[0].uid;
-            let autoNextInterval = !isFirstPlayer ? null : (() => {
+            if (isFirstPlayer) {
+                // 自动跳转状态                
+                let autoNextInterval = (() => {
                     const isRoleDead = role => {
                         const player = nextProps.room.players.find(player => player.playerRole === role);
                         return !player || !!nextProps.room.deaths.find(death => death.uid === player.uid);
                     };
                     switch (nextStatus) {
-                        case EnumRoomStatus.NightStart: return 2000;
+                        case EnumRoomStatus.NightStart: return 4000;
                         case EnumRoomStatus.PredictorChecking: return isRoleDead(EnumPlayerRole.Predictor) ? 5000 : null;
                         case EnumRoomStatus.WitchCuring:
                             return isRoleDead(EnumPlayerRole.Witch) || !nextProps.room.witch.hasCure ? 5000 : null;
@@ -203,16 +207,67 @@ class RoomPage extends React.Component {
                         default: return null;
                     }
                 })();
-            if (autoNextInterval) {
-                this._resetTimerToNextStatus(autoNextInterval);
+                if (autoNextInterval) {
+                    this._resetTimerToNextStatus(autoNextInterval);
+                }
+
+                // 播放声音
+                const playAudioIds = [];
+                switch (prevStatus) {
+                    case EnumRoomStatus.KillersKilling:
+                        playAudioIds.push('killer_close');
+                        break;
+                    case EnumRoomStatus.PredictorChecking:
+                        playAudioIds.push('predictor_close');
+                        break;
+                    case EnumRoomStatus.WitchPosioning:
+                        playAudioIds.push('witch_close');
+                        break;
+                }
+                switch (nextStatus) {
+                    case EnumRoomStatus.Creating:
+                        playAudioIds.splice(0, playAudioIds.length);
+                        break;
+                    case EnumRoomStatus.NightStart:
+                        playAudioIds.push('night_start');
+                        break;
+                    case EnumRoomStatus.KillersConfirmEachOther:
+                        playAudioIds.push({key: 'killer_open', waitBefore: 3000}, 'killer_confirm');
+                        break;
+                    case EnumRoomStatus.KillersKilling:
+                        playAudioIds.push('killer_killing');
+                        break;
+                    case EnumRoomStatus.PredictorChecking:
+                        playAudioIds.push({key: 'predictor_open', waitBefore: 3000}, 'predictor_checking');
+                        break;
+                    case EnumRoomStatus.WitchCuring:
+                        playAudioIds.push({key: 'witch_open', waitBefore: 3000}, 'witch_curing');
+                        break;
+                    case EnumRoomStatus.WitchPosioning:
+                        playAudioIds.push('witch_poisoning');
+                        break;
+                    case EnumRoomStatus.Sunrise:
+                        // playAudioIds.push({key: 'dawn_coming', waitBefore: 3000});
+                        break;
+                    case EnumRoomStatus.VillagersWin:
+                    case EnumRoomStatus.KillersWin:
+                        if (prevStatus != null && prevStatus !== EnumRoomStatus.Voting && prevStatus !== EnumRoomStatus.VoteEnd && prevStatus !== EnumRoomStatus.Sunrise) {
+                            playAudioIds.push({key: 'dawn_coming', waitBefore: 3000});
+                        }
+                        playAudioIds.push({key: 'game_end', waitBefore: 0});
+                        playAudioIds.push({key: nextStatus === EnumRoomStatus.VillagersWin ? 'villager_win' : 'killer_win', waitBefore: 0})
+                        break;
+                }
+                
+                playAudioIds.forEach(audioCfg => pushAudioPlay(audioCfg));
             }
         }
     }
     componentWillMount() {
-        this.checkAutoNextStatus({}, this.props);
+        this.onGetProps({}, this.props);
     }
     componentWillReceiveProps(nextProps) {
-        this.checkAutoNextStatus(this.props, nextProps);
+        this.onGetProps(this.props, nextProps);
     }
 
     renderPlayerList(players, renderPlayerItem = null) {
@@ -314,8 +369,7 @@ class RoomPage extends React.Component {
                             R.uniq(inNight.killersSelecting.map(selInfo => selInfo.targetUid)).length === 1;
                     actionCfgs.push({
                         label: `杀死目标 ${!hasTgtSelected ? ' (请选择目标)' : (!tgtConfirmed ? ' (意见未统一)' : '')}`,
-                        onClick: stepNextHandler,
-                        disabled: !tgtConfirmed
+                        onClick: () => !tgtConfirmed ? window.alert('请选择目标并统一意见') : this.stepToNextStatus()
                     });
                 }
                 break;
@@ -327,13 +381,15 @@ class RoomPage extends React.Component {
                         }
                     };
                     const handler = () => {
-                        const selPlayer = state.selectedPlayerUid && players.find(player => player.uid === state.selectedPlayerUid);
                         if (state.selectedPlayerUid) {
+                            const selPlayer = state.selectedPlayerUid && players.find(player => player.uid === state.selectedPlayerUid);
                             alert(`玩家 ${selPlayer.displayName || '游客'} ${selPlayer.playerRole === EnumPlayerRole.Killer ? '是' : '不是'}狼人`);
                             this.stepToNextStatus({targetUid: state.selectedPlayerUid});
+                        } else {
+                            window.alert('请选择要查看身份的目标');
                         }
                     }
-                    actionCfgs.push({label: `查看身份${!state.selectedPlayerUid ? '(请选择目标)':''}`, onClick: handler, disabled: !state.selectedPlayerUid});
+                    actionCfgs.push({label: `查看身份${!state.selectedPlayerUid ? ' (请选择目标)':''}`, onClick: handler});
                 }
                 break;
             case EnumRoomStatus.WitchCuring:
@@ -363,7 +419,7 @@ class RoomPage extends React.Component {
                     if (room.witch.hasPoison) {
                         actionCfgs.push(
                             {label: '不用毒药', onClick: stepNextHandler},
-                            {label: '用毒药', onClick: () => this.stepToNextStatus({targetUid: state.selectedPlayerUid}), disabled: !state.selectedPlayerUid}
+                            {label: '用毒药', onClick: () => !state.selectedPlayerUid ? window.alert('请选择目标') : this.stepToNextStatus({targetUid: state.selectedPlayerUid})}
                         );
                     } else {
                         actionCfgs.push({label: '没有毒药了', disabled: true});
@@ -378,9 +434,10 @@ class RoomPage extends React.Component {
                             return {className: 'selected-by-me'};
                         }
                     };
+                    const voteHandler = () => !state.selectedPlayerUid ? window.alert('请选择目标') : voteIt({roomId: room._id, uid: currentPlayer.uid, targetUid: state.selectedPlayerUid});
                     actionCfgs.push(
                         {label: '放弃', onClick: () => voteIt({roomId: room._id, uid: currentPlayer.uid, targetUid: null}), disabled: !!voteInfo},
-                        {label: `确认投票${!state.selectedPlayerUid?' (请选择)':''}`, onClick: () => state.selectedPlayerUid && voteIt({roomId: room._id, uid: currentPlayer.uid, targetUid: state.selectedPlayerUid}), disabled: !!voteInfo}
+                        {label: `确认投票${!state.selectedPlayerUid?' (请选择)':''}`, onClick: voteHandler, disabled: !!voteInfo}
                     );
                 }
                 break;
@@ -507,3 +564,7 @@ export default createContainer((props) => {
 
     return data;
 }, RoomPage);
+
+window._dev.RoomsDB = RoomsDB;
+window._dev.EnumPlayerRole = EnumPlayerRole;
+window._dev.EnumRoomStatus = EnumRoomStatus;

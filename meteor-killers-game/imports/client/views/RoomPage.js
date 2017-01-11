@@ -218,10 +218,10 @@ class RoomPage extends React.Component {
                         playAudioIds.push('killer_close');
                         break;
                     case EnumRoomStatus.PredictorChecking:
-                        playAudioIds.push('predictor_close');
+                        playAudioIds.push({key: 'predictor_close', waitBefore: 7000});
                         break;
                     case EnumRoomStatus.WitchPosioning:
-                        playAudioIds.push('witch_close');
+                        playAudioIds.push({key: 'witch_close', waitBefore: 10000});
                         break;
                 }
                 switch (nextStatus) {
@@ -244,10 +244,10 @@ class RoomPage extends React.Component {
                         playAudioIds.push({key: 'witch_open', waitBefore: 3000}, 'witch_curing');
                         break;
                     case EnumRoomStatus.WitchPosioning:
-                        playAudioIds.push('witch_poisoning');
+                        playAudioIds.push({key: 'witch_poisoning', waitBefore: 7000});
                         break;
                     case EnumRoomStatus.Sunrise:
-                        // playAudioIds.push({key: 'dawn_coming', waitBefore: 3000});
+                        playAudioIds.push({key: 'dawn_coming', waitBefore: 3000});
                         break;
                     case EnumRoomStatus.VillagersWin:
                     case EnumRoomStatus.KillersWin:
@@ -255,10 +255,10 @@ class RoomPage extends React.Component {
                             playAudioIds.push({key: 'dawn_coming', waitBefore: 3000});
                         }
                         playAudioIds.push({key: 'game_end', waitBefore: 0});
-                        playAudioIds.push({key: nextStatus === EnumRoomStatus.VillagersWin ? 'villager_win' : 'killer_win', waitBefore: 0})
+                        playAudioIds.push({key: nextStatus === EnumRoomStatus.VillagersWin ? 'villager_win' : 'killer_win', waitBefore: 0});
                         break;
                 }
-                
+
                 playAudioIds.forEach(audioCfg => pushAudioPlay(audioCfg));
             }
         }
@@ -271,15 +271,20 @@ class RoomPage extends React.Component {
     }
 
     renderPlayerList(players, renderPlayerItem = null) {
-        const deadUidMap = arrayToMap(this.props.room.deaths, 'uid');
+        const {room, currentUid} = this.props;
+        const deadUidMap = arrayToMap(room.deaths, 'uid'),
+            showRole = deadUidMap[currentUid] != null || (room.roomStatus === EnumRoomStatus.KillersWin || room.roomStatus === EnumRoomStatus.VillagersWin);
         return (
             <ul className="player-list">
                 {players.map(player => {
                     const nodeCfg = renderPlayerItem && renderPlayerItem(player) || {};
                     return (
-                        <li key={player.uid} className={`player-item ${nodeCfg.className || ''} ${deadUidMap[player.uid] != null ? 'dead-player' : ''}`}
+                        <li key={player.uid} className={`player-item ${nodeCfg.className || ''}`}
                             onClick={this.handlePlayerItemClick} data-uid={player.uid}>
-                            {player.displayName || '游客'} {nodeCfg.content || ''}
+                            {player.displayName || '游客'}
+                            {showRole ? `[${PlayRoleLabels[player.playerRole]}]` : ''}
+                            {nodeCfg.content || ''}
+                            {deadUidMap[player.uid] != null ? <span className="color-red"> (已死亡) </span> : ''}
                         </li>
                     );
                 })}
@@ -396,7 +401,7 @@ class RoomPage extends React.Component {
                 if (isAlive() && userPlayerRole === EnumPlayerRole.Witch) {
                     renderPlayerItem = player => {
                         if (inNight.killedUid && inNight.killedUid === player.uid) {
-                            return {className: 'selected-by-other'};
+                            return {content: <span className="color-red"> (被狼人杀死) </span>};
                         }
                     };
                     if (room.witch.hasCure) {
@@ -517,12 +522,13 @@ class RoomPage extends React.Component {
         } else if (!currentPlayer) {
             pg = <div className="room-page" style={{textAlign: 'center'}}><span style={{lineHeight: '300px'}}>你不在这个房间里</span><RaisedButton className="bottom-nav" onClick={this.handleJoinRoomClick} label="点击加入" primary={true}/></div>;
         } else {
-            const content = this.buildContent();
+            const content = this.buildContent(),
+                isDead = R.find(R.propEq('uid', currentPlayer.uid))(room.deaths);
             pg = (
                 <div className="room-page">
                     <h3>
                         <RichUserName uid={currentPlayer.uid} name={currentPlayer.displayName}/>
-                        你的身份是: {PlayRoleLabels[currentPlayer.playerRole]}
+                        你的身份是: {PlayRoleLabels[currentPlayer.playerRole]} {isDead ? <span className="color-red">(已死亡)</span> : ''}
                     </h3>
                     {this.renderRoomHeader()}
                     {content.playerList}

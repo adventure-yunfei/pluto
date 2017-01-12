@@ -66,7 +66,7 @@ export const stepToNextStatus = createMethod({
                 .map(user => user.profile.displayName).sort().join(', '),
             getCntOfRole = playerRole => (_playerRoleMap[playerRole] || []).length,
             getAliveCntOfRole = playerRole => (_playerRoleMap[playerRole] || []).filter(player => _deadUidMap[player.uid] == null).length,
-            getInNightInitial = () => ({partnerConfirmedKillerUids: [], killersSelecting: [], killedUid: null, cured: false, poisonedUid: null}),
+            getInNightInitial = () => ({partnerConfirmedKillerUids: [], killersSelecting: [], killedUid: null, cured: false, poisonedUid: null, checkedUid: null}),
             updateRoom = ($set, moreUpdator = {}) => RoomsDB.update(roomId, {$set: $set, ...moreUpdator}),
             pushMessage = (text, {visibleRoles = null, invisibleRoles = null} = {}) => RoomsDB.update(roomId, {$push: {messages: {text, msgTime: Date.now(), visibleRoles, invisibleRoles}}}),
             checkGameEnding = () => {
@@ -183,10 +183,8 @@ export const stepToNextStatus = createMethod({
                 break;
             case EnumRoomStatus.PredictorChecking:
                 if (getAliveCntOfRole(EnumPlayerRole.Predictor) > 0) {
-                    if (!targetUid) { throw new Meteor.Error('请选择你要查看身份的目标'); }
-                    if (_playerMap[targetUid] == null) { throw new Meteor.Error('要查看身份的目标玩家不在房间内'); }
-                    if (_deadUidMap[targetUid] != null) { throw new Meteor.Error('要查看身份的目标玩家已死亡'); }
-                    pushMessage(`预言家查看了 *${getPlayerNames([targetUid])}* 的身份，TA *${_playerMap[targetUid].playerRole === EnumPlayerRole.Killer ? '是' : '不是'}* 狼人`, {visibleRoles: [EnumPlayerRole.Predictor]});
+                    if (!inNight.checkedUid) { throw new Meteor.Error('请先选择目标查看身份'); }
+                    pushMessage(`预言家查看了 *${getPlayerNames([inNight.checkedUid])}* 的身份，TA *${_playerMap[inNight.checkedUid].playerRole === EnumPlayerRole.Killer ? '是' : '不是'}* 狼人`, {visibleRoles: [EnumPlayerRole.Predictor]});
                 }
                 if (getCntOfRole(EnumPlayerRole.Witch) > 0 /*有女巫*/) {
                     updateRoom({roomStatus: EnumRoomStatus.WitchCuring});
@@ -325,6 +323,24 @@ export const killerConfirmPartner = createMethod({
         }
     }
 });
+
+export const predictorCheckTarget = createMethod({
+    name: 'rooms.predictorCheckTarget',
+    validate: new SimpleSchema({
+        roomId: {type: String},
+        targetUid: {type: String}
+    }).validator(),
+    run({roomId, targetUid}) {
+        const room = shouldGetRoom(roomId),
+            findByUid = R.find(R.propEq('uid', targetUid));
+        if (room.inNight.checkedUid) { throw new Error('你已经查看过其中一个人的身份了'); }
+        if (!findByUid(room.players)) { throw new Meteor.Error('要查看身份的目标玩家不在房间内'); }
+        if (findByUid(room.deaths)) { throw new Meteor.Error('要查看身份的目标玩家已死亡'); }
+        RoomsDB.update(roomId, {
+            $set: {'inNight.checkedUid': targetUid}
+        });
+    }
+})
 
 export const voteIt = createMethod({
     name: 'rooms.voteIt',

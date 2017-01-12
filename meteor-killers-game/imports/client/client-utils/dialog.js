@@ -44,7 +44,7 @@ export function openDialog(props) {
     ReactDOM.render(<Dialog {...props}/>, placeholder);
 }
 
-export function alertDlg({content, onOK = null}) {
+export function alertDlg(content, {onOK = null} = {}) {
     return new Promise((resolve, reject) => {
         openDialog({
             modal: true,
@@ -61,7 +61,7 @@ export function alertDlg({content, onOK = null}) {
     });
 }
 
-export function confirmDlg({content, onOK = null, onCancel = null}) {
+export function confirmDlg(content, {onOK = null, onCancel = null} = {}) {
     return new Promise((resolve, reject) => {
         openDialog({
             modal: true,

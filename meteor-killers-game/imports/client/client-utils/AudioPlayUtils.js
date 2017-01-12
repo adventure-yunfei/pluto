@@ -91,8 +91,7 @@ export function pushAudioPlay(audioCfg) {
 }
 
 export function requestAudioPlayPermissionOnMobile() {
-    return alertDlg({
-        content: '请点击确认以在手机端上开启音频播放功能',
+    return alertDlg('请点击确认以在手机端上开启音频播放功能', {
         onOK() {
             AUDIO_RESOURCES.forEach(({key}) => {
                 const audioNode = document.getElementById(key);

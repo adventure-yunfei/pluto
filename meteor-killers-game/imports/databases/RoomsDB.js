@@ -32,7 +32,8 @@ RoomsDB.attachSchema(new SimpleSchema({
     'inNight.killersSelecting': {type: [Object], defaultValue: []}, 'inNight.killersSelecting.$.killerUid': {type: String}, 'inNight.killersSelecting.$.targetUid': {type: String},
     'inNight.killedUid': {type: String, optional: true},
     'inNight.cured': {type: Boolean, defaultValue: false},
-    'inNight.poisonedUid': {type: String, optional: true}
+    'inNight.poisonedUid': {type: String, optional: true},
+    'inNight.checkedUid': {type: String, optional: true}
 
 }));
 

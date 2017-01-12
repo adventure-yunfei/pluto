@@ -66,7 +66,7 @@ class AudioPlayerManager {
             window.alert(`音频id不存在: ${key}`);
             return;
         }
-        this._promise = this._promise
+        return this._promise = this._promise
             .then(() => {
                 const timeout = Math.max(0, waitBefore + this._playEndTime - Date.now());
                 return waitFor(timeout);
@@ -87,7 +87,7 @@ export function pushAudioPlay(audioCfg) {
             waitBefore: 2000
         };
     }
-    audioPlayerManager.pushAudioPlay(audioCfg);
+    return audioPlayerManager.pushAudioPlay(audioCfg);
 }
 
 export function requestAudioPlayPermissionOnMobile() {

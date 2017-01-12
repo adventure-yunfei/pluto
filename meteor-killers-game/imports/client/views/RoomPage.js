@@ -174,12 +174,6 @@ class RoomPage extends React.Component {
         }
     }
 
-    _resetTimerToNextStatus(timeout) {
-        if (this._nextStatusTimer) {
-            clearTimeout(this._nextStatusTimer);
-        }
-        this._nextStatusTimer = setTimeout(() => this.stepToNextStatus(), timeout);
-    }
     onGetProps(prevProps, nextProps) {
         const getStatus = R.view(R.lensPath(['room', 'roomStatus'])),
             prevStatus = getStatus(prevProps),
@@ -191,25 +185,27 @@ class RoomPage extends React.Component {
             });
             const isFirstPlayer = nextProps.room.players.length && nextProps.currentUid === nextProps.room.players[0].uid;
             if (isFirstPlayer) {
-                // 自动跳转状态                
-                let autoNextInterval = (() => {
-                    const isRoleDead = role => {
-                        const player = nextProps.room.players.find(player => player.playerRole === role);
-                        return !player || !!nextProps.room.deaths.find(death => death.uid === player.uid);
-                    };
-                    switch (nextStatus) {
-                        case EnumRoomStatus.NightStart: return 4000;
-                        case EnumRoomStatus.PredictorChecking: return isRoleDead(EnumPlayerRole.Predictor) ? 5000 : null;
-                        case EnumRoomStatus.WitchCuring:
-                            return isRoleDead(EnumPlayerRole.Witch) || !nextProps.room.witch.hasCure ? 5000 : null;
-                        case EnumRoomStatus.WitchPosioning:
-                            return isRoleDead(EnumPlayerRole.Witch) || !nextProps.room.witch.hasPoison ? 5000 : null;
-                        default: return null;
-                    }
-                })();
-                if (autoNextInterval) {
-                    this._resetTimerToNextStatus(autoNextInterval);
-                }
+                // 自动跳转状态
+                const checkAutoNext = this._checkAutoNext = () => {
+                    const autoNextInterval = (() => {
+                        const isRoleDead = role => {
+                            const player = nextProps.room.players.find(player => player.playerRole === role);
+                            return !player || !!nextProps.room.deaths.find(death => death.uid === player.uid);
+                        };
+                        switch (nextStatus) {
+                            case EnumRoomStatus.NightStart: return 3000;
+                            case EnumRoomStatus.PredictorChecking: return isRoleDead(EnumPlayerRole.Predictor) ? 7000 : null;
+                            case EnumRoomStatus.WitchCuring:
+                                return isRoleDead(EnumPlayerRole.Witch) || !nextProps.room.witch.hasCure ? 7000 : null;
+                            case EnumRoomStatus.WitchPosioning:
+                                return isRoleDead(EnumPlayerRole.Witch) || !nextProps.room.witch.hasPoison ? 10000 : null;
+                            default: return null;
+                        }
+                    })();
+
+                    this._autoNextTimer && clearTimeout(this._autoNextTimer);
+                    this._autoNextTimer = autoNextInterval && setTimeout(() => this.stepToNextStatus(), autoNextInterval);
+                };
 
                 // 播放声音
                 const playAudioIds = [];
@@ -232,7 +228,7 @@ class RoomPage extends React.Component {
                         playAudioIds.push('night_start');
                         break;
                     case EnumRoomStatus.KillersConfirmEachOther:
-                        playAudioIds.push({key: 'killer_open', waitBefore: 3000}, 'killer_confirm');
+                        playAudioIds.push('killer_open', 'killer_confirm');
                         break;
                     case EnumRoomStatus.KillersKilling:
                         playAudioIds.push('killer_killing');
@@ -259,7 +255,12 @@ class RoomPage extends React.Component {
                         break;
                 }
 
-                playAudioIds.forEach(audioCfg => pushAudioPlay(audioCfg));
+                Promise.all(playAudioIds.map(audioCfg => pushAudioPlay(audioCfg)))
+                    .then(() => {
+                        if (checkAutoNext === this._checkAutoNext) {
+                            checkAutoNext();
+                        }
+                    });
             }
         }
     }
@@ -273,7 +274,7 @@ class RoomPage extends React.Component {
     renderPlayerList(players, renderPlayerItem = null) {
         const {room, currentUid} = this.props;
         const deadUidMap = arrayToMap(room.deaths, 'uid'),
-            showRole = deadUidMap[currentUid] != null || (room.roomStatus === EnumRoomStatus.KillersWin || room.roomStatus === EnumRoomStatus.VillagersWin);
+            showRole = (room.round > 1 && deadUidMap[currentUid] != null) || (room.roomStatus === EnumRoomStatus.KillersWin || room.roomStatus === EnumRoomStatus.VillagersWin);
         return (
             <ul className="player-list">
                 {players.map(player => {
@@ -281,10 +282,10 @@ class RoomPage extends React.Component {
                     return (
                         <li key={player.uid} className={`player-item ${nodeCfg.className || ''}`}
                             onClick={this.handlePlayerItemClick} data-uid={player.uid}>
-                            {player.displayName || '游客'}
-                            {showRole ? `[${PlayRoleLabels[player.playerRole]}]` : ''}
-                            {nodeCfg.content || ''}
-                            {deadUidMap[player.uid] != null ? <span className="color-red"> (已死亡) </span> : ''}
+                            {player.displayName || '游客'}{' '}
+                            {showRole ? `[${PlayRoleLabels[player.playerRole]}]` : ''}{' '}
+                            {nodeCfg.content || ''}{' '}
+                            {deadUidMap[player.uid] != null ? <span className="color-red">(已死亡)</span> : ''}
                         </li>
                     );
                 })}

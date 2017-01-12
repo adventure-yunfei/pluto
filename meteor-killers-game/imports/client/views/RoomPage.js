@@ -10,7 +10,7 @@ import TextField from 'material-ui/TextField';
 import IconDone from 'material-ui/svg-icons/action/done';
 import arrayToMap from '../../utils/arrayToMap';
 import { getVoteResult } from '../../utils/roomsUtils';
-import { pushAudioPlay } from '../client-utils/AudioPlayUtils';
+import { pushAudioPlay, requestAudioPlayPermissionOnMobile } from '../client-utils/AudioPlayUtils';
 import EnumRoomStatus from '../../enums/EnumRoomStatus';
 import EnumPlayerRole, { PlayRoleLabels } from '../../enums/EnumPlayerRole';
 import RoomsDB from '../../databases/RoomsDB';
@@ -458,7 +458,7 @@ class RoomPage extends React.Component {
                             .join(', ');
                         return {
                             className: `be-voted ${highestVotedUid === player.uid ? 'voted-dead' : ''}`,
-                            content: `共${beVotedCnt}票 (${voteSourceNames})`
+                            content: ` 共${beVotedCnt}票 (${voteSourceNames})`
                         };
                     }
                 };
@@ -542,6 +542,42 @@ class RoomPage extends React.Component {
     }
 }
 
+const isMobile = true;
+let mobileAudioPlayEnabled = false;
+class RoomPageWrapper extends React.Component {
+    state = {
+        requestingAudioPermission: false
+    }
+    onGetProps(props) {
+        const {room, currentUid} = props,
+            isFirstPlayer = room && room.players && room.players.length && room.players[0].uid === currentUid;
+        if (isFirstPlayer) {
+            // 请求音频播放权限
+            if (isMobile && !mobileAudioPlayEnabled && !this.state.requestingAudioPermission) {
+                this.setState({requestingAudioPermission: true});
+                requestAudioPlayPermissionOnMobile()
+                    .then(() => {
+                        mobileAudioPlayEnabled = true;
+                        this.setState({requestingAudioPermission: false});
+                    });
+            }
+        }
+    }
+    componentWillMount() {
+        this.onGetProps(this.props);
+    }
+    componentWillReceiveProps(nextProps) {
+        this.onGetProps(nextProps);
+    }
+    render() {
+        if (this.state.requestingAudioPermission) {
+            return <span/>;
+        } else {
+            return <RoomPage {...this.props}/>;
+        }
+    }
+}
+
 export default createContainer((props) => {
     const roomId = props.params.roomId,
         data = {
@@ -569,7 +605,7 @@ export default createContainer((props) => {
     }
 
     return data;
-}, RoomPage);
+}, RoomPageWrapper);
 
 window._dev.RoomsDB = RoomsDB;
 window._dev.EnumPlayerRole = EnumPlayerRole;

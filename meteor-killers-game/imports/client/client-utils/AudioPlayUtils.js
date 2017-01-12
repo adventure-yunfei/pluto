@@ -1,5 +1,6 @@
 import noop from 'lodash/noop';
 import arrayToMap from '../../utils/arrayToMap';
+import { alertDlg } from './dialog';
 
 const AUDIO_RESOURCES = [
     {key: 'villager_win', src: '/audios/villager_win.mp3'},
@@ -26,23 +27,11 @@ const waitFor = timeout => !timeout ? Promise.resolve() : new Promise((resolve, 
 });
 
 const playAudio = (audioId) => new Promise((resolve, reject) => {
-    let cnt = 0,
-        maxCnt = 200;
-    const findAudioNode = () => {
-        const audioNode = document.getElementById(audioId);
-        if (audioNode) {
-            resolve(audioNode);
-        } else {
-            cnt++;
-            if (cnt >= maxCnt) {
-                reject(`找不到音频节点(${audioId})`);
-            } else {
-                setTimeout(findAudioNode, 50);
-            }
-        }
-    };
-    findAudioNode();
-}).then(audioNode => new Promise((resolve, reject) => {
+    const audioNode = document.getElementById(audioId);
+    if (!audioNode) {
+        reject(`找不到音频节点(${audioId})`);
+        return;
+    }
     audioNode.play().then(() => {
         const checkPlayEnd = () => {
             if (audioNode.currentTime >= audioNode.duration) {
@@ -56,7 +45,7 @@ const playAudio = (audioId) => new Promise((resolve, reject) => {
         window.alert(`播放音频失败: ${audioNode.id}`);
         reject(err);
     });
-}));
+});
 
 class AudioPlayerManager {
     _promise = Promise.resolve()
@@ -99,4 +88,16 @@ export function pushAudioPlay(audioCfg) {
         };
     }
     audioPlayerManager.pushAudioPlay(audioCfg);
+}
+
+export function requestAudioPlayPermissionOnMobile() {
+    return alertDlg({
+        content: '请点击确认以在手机端上开启音频播放功能',
+        onOK() {
+            AUDIO_RESOURCES.forEach(({key}) => {
+                const audioNode = document.getElementById(key);
+                audioNode && audioNode.load();
+            });
+        }
+    });
 }

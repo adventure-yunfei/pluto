@@ -1,9 +1,10 @@
+import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
 import { createContainer } from 'meteor/react-meteor-data';
 import React, {PropTypes} from 'react';
 import DocumentTitle from 'react-document-title';
 import R from 'ramda';
-import { Meteor } from 'meteor/meteor';
+import noop from 'lodash/noop';
 import RaisedButton from 'material-ui/RaisedButton';
 import IconButton from 'material-ui/IconButton';
 import TextField from 'material-ui/TextField';
@@ -179,7 +180,8 @@ class RoomPage extends React.Component {
 
     handleRestartClick = () => {
         confirmDlg('确认重新开始游戏？')
-            .then(() => restartRoom({roomId: this.props.room._id}));
+            .then(() => restartRoom({roomId: this.props.room._id}))
+            .catch(noop);
     }
 
     onGetProps(prevProps, nextProps) {

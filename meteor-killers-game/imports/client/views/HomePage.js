@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { createContainer } from 'meteor/react-meteor-data';
 import React, { PropTypes } from 'react';
+import noop from 'lodash/noop';
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 import { alertDlg, confirmDlg } from '../client-utils/dialog';
@@ -14,7 +15,7 @@ class HomePage extends React.Component {
         router: PropTypes.object.isRequired
     }
 
-    handleClearBtnClick = () => confirmDlg('确认清理全部数据?').then(() => clearAllDBs({}))
+    handleClearBtnClick = () => confirmDlg('确认清理全部数据?').then(() => clearAllDBs({})).catch(noop)
 
     handleCreateRoomClick = () => this.props.router.push('/room/create')
 

@@ -53,7 +53,7 @@ export const stepToNextStatus = createMethod({
         if (roomStatus !== room.roomStatus) {
             throw new Meteor.Error('客户端房间状态与服务端不一致，请稍后重试');
         }
-        const {players, inNight} = room,
+        const {players, inDay, inNight} = room,
             _playerMap = arrayToMap(players, 'uid'),
             _deadUidMap = arrayToMap(room.deaths, 'uid'),
             _playerRoleMap = players.reduce((result, player) => {
@@ -221,13 +221,14 @@ export const stepToNextStatus = createMethod({
                 }
                 break;
             case EnumRoomStatus.Sunrise:
-                updateRoom({roomStatus: EnumRoomStatus.Voting, voting: []});
+                // 开始投票前, 重置变量
+                updateRoom({roomStatus: EnumRoomStatus.Voting, 'inDay.voting': [], 'inDay.voteCandidates': null});
                 pushMessage('开始投票...');
                 break;
             case EnumRoomStatus.Voting:
             {
-                if (room.voting.length < (room.players.length - room.deaths.length)) { throw new Meteor.Error('还有人未投票，不能结束投票状态'); }
-                room.voting.forEach(({uid, targetUid}) => {
+                if (inDay.voting.length < (room.players.length - room.deaths.length)) { throw new Meteor.Error('还有人未投票，不能结束投票状态'); }
+                inDay.voting.forEach(({uid, targetUid}) => {
                     if (targetUid) {
                         pushMessage(`*${getPlayerNames([uid])}*    投票给了    *${getPlayerNames([targetUid])}*`);
                     } else {
@@ -236,7 +237,7 @@ export const stepToNextStatus = createMethod({
                 });
                 updateRoom({roomStatus: EnumRoomStatus.VoteEnd});
                 pushMessage('投票结束');
-                const {highestVotedUid, votedCountMap} = getVoteResult(room.voting);
+                const {highestVotedUid, votedCountMap} = getVoteResult(inDay.voting);
                 if (highestVotedUid) {
                     RoomsDB.update(roomId, {$push: {deaths: {uid: highestVotedUid, deadTime: Date.now()}}});
                     pushMessage(`*${getPlayerNames([highestVotedUid])}* 得到了最高票 *${votedCountMap[highestVotedUid]}* 票，被投死了`);
@@ -260,13 +261,14 @@ export const voteAgain = createMethod({
     }).validator(),
     run({roomId}) {
         const room = shouldGetRoom(roomId);
-        if (room.roomStatus !== EnumRoomStatus.VoteEnd) {
-            throw new Error('重新投票之前必须处于投票完成状态');
-        }
+        if (room.roomStatus !== EnumRoomStatus.VoteEnd) { throw new Meteor.Error('重新投票之前必须处于投票完成状态'); }
+        const {highestVotedUids} = getVoteResult(room.inDay.voting);
+        if (highestVotedUids.length === 1) { throw new Meteor.Error('已经投票得出了最高票，不能重新投票'); }
         RoomsDB.update(roomId, {
             $set: {
                 roomStatus: EnumRoomStatus.Voting,
-                voting: []
+                'inDay.voting': [],
+                'inDay.voteCandidates': highestVotedUids
             }
         });
         RoomsDB.update(roomId, {$push: {messages: {text: '重新开始投票...', msgTime: Date.now()}}});
@@ -352,11 +354,14 @@ export const voteIt = createMethod({
     run({roomId, uid, targetUid}) {
         const room = shouldGetRoom(roomId);
         if (room.roomStatus !== EnumRoomStatus.Voting) { throw new Meteor.Error('当前并未处于投票状态，不能投票'); }
-        if (room.voting.find(voteInfo => voteInfo.uid === uid)) { throw new Meteor.Error('该用户已经投票'); }
+        if (room.inDay.voting.find(voteInfo => voteInfo.uid === uid)) { throw new Meteor.Error('该用户已经投票'); }
+        if (targetUid && room.inDay.voteCandidates && R.indexOf(targetUid, room.inDay.voteCandidates) === -1) {
+            throw new Meteor.Error('现在只能投票给指定的候选人');
+        }
         RoomsDB.update(roomId, {
-            $addToSet: {voting: {uid, targetUid}}
+            $addToSet: {'inDay.voting': {uid, targetUid}}
         });
-        if (room.voting.length + 1 >= (room.players.length - room.deaths.length)) {
+        if (room.inDay.voting.length + 1 >= (room.players.length - room.deaths.length)) {
             stepToNextStatus({roomId: roomId, roomStatus: room.roomStatus});
         }
     }

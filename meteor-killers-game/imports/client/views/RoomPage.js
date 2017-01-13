@@ -122,12 +122,20 @@ class RoomPage extends React.Component {
                     case EnumRoomStatus.WitchPosioning:
                         return playerRole === EnumPlayerRole.Witch && room.witch.hasPoison;
                     case EnumRoomStatus.Voting:
-                        return !room.voting.find(voteInfo => voteInfo.uid === currentPlayer.uid);
+                        return !room.inDay.voting.find(voteInfo => voteInfo.uid === currentPlayer.uid);
                     default:
                         return false;
                 }
             },
-            canBeSelected = targetUid => isAlive(targetUid);
+            canBeSelected = targetUid => {
+                if (!isAlive(targetUid)) {
+                    return false;
+                } else if (room.roomStatus === EnumRoomStatus.Voting) {
+                    return !room.inDay.voteCandidates || R.indexOf(targetUid, room.inDay.voteCandidates) !== -1;
+                } else {
+                    return true;
+                }
+            };
         if (canSelect() && canBeSelected(targetUid)) {
             this.setState({
                 selectedPlayerUid: targetUid
@@ -445,13 +453,15 @@ class RoomPage extends React.Component {
                 }
                 break;
             case EnumRoomStatus.Voting:
-                if (isAlive()) {
-                    const voteInfo = room.voting.find(vote => vote.uid === currentPlayer.uid);
-                    renderPlayerItem = player => {
-                        if (player.uid === (voteInfo ? voteInfo.targetUid : state.selectedPlayerUid)) {
-                            return {className: 'selected-by-me'};
-                        }
+            {
+                const voteInfo = room.inDay.voting.find(vote => vote.uid === currentPlayer.uid);
+                renderPlayerItem = player => {
+                    return {
+                        className: player.uid === (voteInfo ? voteInfo.targetUid : state.selectedPlayerUid) ? 'selected-by-me' : '',
+                        content: (room.inDay.voteCandidates && R.indexOf(player.uid, room.inDay.voteCandidates) !== -1) ? <span className="color-red">(候选人)</span> : null
                     };
+                };
+                if (isAlive()) {
                     const voteHandler = () => !state.selectedPlayerUid ? alertDlg('请选择目标') : voteIt({roomId: room._id, uid: currentPlayer.uid, targetUid: state.selectedPlayerUid});
                     actionCfgs.push(
                         {label: '放弃', onClick: () => voteIt({roomId: room._id, uid: currentPlayer.uid, targetUid: null}), disabled: !!voteInfo},
@@ -459,13 +469,14 @@ class RoomPage extends React.Component {
                     );
                 }
                 break;
+            }
             case EnumRoomStatus.VoteEnd:
             {
-                const {votedCountMap, highestVotedUid} = getVoteResult(room.voting);
+                const {votedCountMap, highestVotedUid} = getVoteResult(room.inDay.voting);
                 renderPlayerItem = player => {
                     const beVotedCnt = votedCountMap[player.uid];
                     if (beVotedCnt != null) {
-                        const voteSourceNames = room.voting
+                        const voteSourceNames = room.inDay.voting
                             .filter(item => item.targetUid === player.uid)
                             .map(item => _playerMap[item.uid].displayName)
                             .join(', ');

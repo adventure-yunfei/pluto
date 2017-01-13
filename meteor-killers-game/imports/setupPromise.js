@@ -22,7 +22,7 @@ Promise.prototype.finally = (function () {
     }
 })();
 
-window.onunhandledrejection = event => {
+window.addEventListener('unhandledrejection', event => {
     const {reason} = event;
     let errMsg = '';
     if (typeof reason === 'string') {
@@ -35,4 +35,4 @@ window.onunhandledrejection = event => {
         errMsg = reason.message;
     }
     alert(errMsg || reason.toString());
-};
+});

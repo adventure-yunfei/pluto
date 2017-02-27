@@ -19,11 +19,19 @@ export function getVoteResult(roomVoting) {
     if (voteRank.length === 1 || (voteRank.length >= 2 && voteRank[0].voteCount > voteRank[1].voteCount)) {
         highestVotedUid = voteRank[0].uid;
     }
-
+    const firstVote = R.compose(
+        R.defaultTo({}),
+        R.head
+    )(voteRank);
+    const highestVotedUids = R.compose(
+        R.map(R.prop('uid')),
+        R.filter(R.eqProps('voteCount', firstVote))
+    )(voteRank);
 
     return {
         sortedResult: voteRank,
         votedCountMap: beVotedUidCntMap,
-        highestVotedUid: highestVotedUid
+        highestVotedUid: highestVotedUid,
+        highestVotedUids: highestVotedUids
     };
 }

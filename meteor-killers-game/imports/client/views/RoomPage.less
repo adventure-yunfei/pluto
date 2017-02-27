@@ -1,6 +1,10 @@
 .room-page {
   padding: 16px;
 
+  audio.room-status-sound {
+    display: inline-block;
+  }
+
   .player-list {
     .player-item {
       &.selected-by-other {
@@ -9,10 +13,6 @@
 
       &.selected-by-me {
         background-color: green;
-      }
-
-      &.dead-player {
-        background-color: red;
       }
     }
   }

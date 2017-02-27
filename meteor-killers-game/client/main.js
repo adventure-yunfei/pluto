@@ -1,3 +1,4 @@
+import '../imports/dev';
 import { Meteor } from 'meteor/meteor';
 import '../imports/setupPromise';
 import 'normalize.css';
@@ -16,3 +17,4 @@ Meteor.startup(() => {
       document.getElementById('app')
   );
 });
+

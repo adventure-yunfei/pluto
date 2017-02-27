@@ -24,7 +24,9 @@ RoomsDB.attachSchema(new SimpleSchema({
     'messages.$.visibleRoles': {type: [Number], optional: true},
     'messages.$.invisibleRoles': {type: [Number], optional: true},
 
-    voting: {type: [Object], defaultValue: []}, 'voting.$.uid': {type: String}, 'voting.$.targetUid': {type: String, optional: true}, // targetUid 为 null 代表弃权
+    'inDay': {type: Object, defaultValue: {}},
+    'inDay.voting': {type: [Object], defaultValue: []}, 'inDay.voting.$.uid': {type: String}, 'inDay.voting.$.targetUid': {type: String, optional: true}, // targetUid 为 null 代表弃权
+    'inDay.voteCandidates': {type: [String], optional: true}, // 被投票的候选人 (最高票有多个时，重新投票后只能投给这些候选人)
 
     // 天黑后的中间状态
     inNight: {type: Object, defaultValue: {}},
@@ -32,7 +34,8 @@ RoomsDB.attachSchema(new SimpleSchema({
     'inNight.killersSelecting': {type: [Object], defaultValue: []}, 'inNight.killersSelecting.$.killerUid': {type: String}, 'inNight.killersSelecting.$.targetUid': {type: String},
     'inNight.killedUid': {type: String, optional: true},
     'inNight.cured': {type: Boolean, defaultValue: false},
-    'inNight.poisonedUid': {type: String, optional: true}
+    'inNight.poisonedUid': {type: String, optional: true},
+    'inNight.checkedUid': {type: String, optional: true}
 
 }));
 

@@ -3,7 +3,7 @@ author: yunfei
 head:
 date: 2016-09-19
 title: Virtual DOM 介绍及简单实现
-tags: web, virtual dom
+tags: web, virtual_dom
 images:
 category: web
 status: publish
@@ -161,9 +161,9 @@ if (getType(oldVNode) === getType(newVNode)) {
 
 # Virtual DOM 真的有那么高效吗？
 
-React 宣称自己使用了 Virtual DOM，所以渲染效率很快。实际上除非合理使用，否则渲染效率反而可能下降，<s>因为 Virtual DOM 的差异对比在大型应用中非常耗时。</s> (这一句存疑, Virtual DOM的算法原理上在实际环境中有限的DOM数里下不会带来明显的消耗, 应当是React作了过多的其他处理。)
+React 宣称自己使用了 Virtual DOM，所以渲染效率很快。实际上除非合理使用，否则渲染效率反而可能下降，因为 Virtual DOM 的差异对比在大型应用中是有消耗的。
 
-举个例子，假如 Virtual DOM 中有1000个节点，而用户仅仅只是在输入框里敲了一行字，如果直接更新实际DOM，消耗非常少，然而有了 Virtual DOM 之后，需要先对比整棵1000个节点的树之后再去更新输入框，拖性能后腿效果一流！
+举个例子，假如 Virtual DOM 中有1000个节点，而用户仅仅只是在输入框里敲了一行字，如果直接更新实际DOM，消耗非常少，然而有了 Virtual DOM 之后，需要先对比整棵1000个节点的树之后再去更新输入框，带来了额外的消耗。
 
 所以React引入了 `shouldUpdateComponent`、`immutable.js`、Pure Render 等方法减少 Virtual DOM 差异对比的消耗。
 

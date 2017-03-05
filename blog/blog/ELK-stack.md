@@ -3,7 +3,7 @@ author: yunfei
 head:
 date: 2016-04-19
 title: ELK 日志管理方案介绍及使用
-tags: log analysis, Elasticsearch, Logstash, Kibana
+tags: log, Elasticsearch
 images:
 category: log analysis
 status: publish

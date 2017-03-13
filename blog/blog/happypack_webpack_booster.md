@@ -30,7 +30,7 @@ Webpack 是个守旧的 js 工具，跟其他大部分 js 工具一样，是个�
 
 读了读源代码，Webpack 在编译文件部分的流程大致如下：
 
-```
+```doc
     a. 开始编译 (Compiler#run)
     ...
     b. 开始编译入口文件 (Compilation#addEntry)
@@ -46,7 +46,7 @@ Webpack 是个守旧的 js 工具，跟其他大部分 js 工具一样，是个�
 
 编译文件中主要的耗时操作在于 Loader 对源文件的转换操作，而 Loader 的可异步的设计使得转换操作的执行并不被限制在同一线程内。下面对 Loader 进行改造，使其支持多进程并发：
 
-```
+```doc
     ...
     b.2 执行 Loader 得到文件结果
         LoaderWrapper 作为新的 Loader 入口接收文件输入信息
@@ -74,7 +74,7 @@ HappyPack 的实现就是这个流程，代码参考 [HappyLoader#apply](https:/
 
 正常情况下，一个文件引入多个依赖，多个依赖之间可以并发；同时每个依赖引入多个子依赖，这些依赖和子依赖之间，只要没有直接的依赖链，都可以并发。比如有如下文件：
 
-```
+```javascript
 // a.js
 require('./a-b.js');
 require('./a-c.js');

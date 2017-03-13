@@ -37,6 +37,9 @@
             host: 'http://' + hosts.gitblog.by_domain,
             href: '/'
         }, {
+            text: 'Github',
+            href: 'https://github.com/adventure-yunfei',
+        }, {
             text: 'Django',
             host: 'http://' + hosts.django.by_domain,
             deprecated: true,
@@ -83,12 +86,12 @@
                     subMenuContainerNode = createDiv('sub-menus-container');
                 rootMenuNode.appendChild(createAnchor({
                     cls: 'global-menu-item root-menu',
-                    href: rootMenu.href ? rootMenu.host + rootMenu.href : 'javascript:void(0)',
+                    href: rootMenu.href ? (rootMenu.host || '') + rootMenu.href : 'javascript:void(0)',
                     text: rootMenu.text
                 }));
 
                 (rootMenu.subMenus || []).forEach(function (subMenu) {
-                    subMenuContainerNode.appendChild(createAnchor({cls: 'global-menu-item', href: rootMenu.host + subMenu.href, text: subMenu.text}));
+                    subMenuContainerNode.appendChild(createAnchor({cls: 'global-menu-item', href: (rootMenu.host || '') + subMenu.href, text: subMenu.text}));
                 });
 
                 rootMenuNode.appendChild(subMenuContainerNode);

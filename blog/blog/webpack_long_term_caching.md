@@ -21,21 +21,43 @@ webpack 文档里有一篇非常简单的关于如何做到[持久缓存（Long-
 
 对此，我无力吐槽。。。在实际的场景里，光用 chunkhash 基本上来说并没有什么卵用，因为还有一堆的情况会导致即使实际上相关代码没变， chunkhash 还是变了。
 
-更新：最新的 [webpack 2 的相关文档](https://webpack.js.org/guides/caching/) 已经提及了大部分内容，不过还有一些细节没有说到，这篇文章还是有用的。
+更新：最新的 [webpack 2 的相关文档](https://webpack.js.org/guides/caching/) 已经提及了部分内容，不过还有一些问题没有说到，这篇文章还是很有用的。
 
 # webpack 里怎么提高缓存利用率？
 
-通常来说，我们都会在 webpack 里面定义 common chunk 提取公共代码，使这部分代码可以在多个页面以及多次编译之间保持一致，得以缓存。但这部分公共代码，在一次编译里多个页面共享缓存是没什么问题的，多次编译之间还能利用缓存就没想的那么容易了，然而这在快速迭代上线的项目里，没有多次编译之间的一致缓存，几乎等于没有缓存。
+通常来说，我们都会在 webpack 里面定义 common chunk 提取公共代码，使这部分代码可以在多个页面以及多次编译之间保持一致，得以缓存。
+比如如下的代码分离的配置：
+
+```javascript
+// webpack.config.js
+{
+    entry: {
+        app_1: './entry_1.js',
+        app_2: './entry_2.js',
+        vender: ['react', 'react-dom']
+    },
+    // ...
+    plugins: [
+        new CommonsChunkPlugin({name: 'vender', minChunks: Infinity}),
+        new CommonsChunkPlugin({name: 'common'})
+    ]
+}
+```
+
+这样的配置对于每个页面分离了三个分块：永不变化的三方库代码 vender.js, 页面间共享的代码 common.js, 以及页面特定业务代码 app_*.js。对应了不同的变化频率，较好的利用缓存。
+
+想法是很好的，但这样的常见配置实际在 webpack 编译中却不一定能达到目的。分离出的公共代码（不论是 vender.js 还是 common.js），在一次编译里多个页面共享缓存是没什么问题的，多次编译之间还能利用缓存就没想的那么容易了（实际上几乎每次编译，公共代码都会缓存失效），然而这在快速迭代上线的项目里，没有多次编译之间的一致缓存，几乎等于没有缓存。
 
 # webpack 编译中会导致缓存失效的因素
 
-在一个 webpack 编译出的分块 (chunk) 文件中，内容分为三部分：
+在一个 webpack 编译出的分块 (chunk) 文件中，内容分为如下四部分：
 
-- a. 项目源代码 (即模块的内容)
-- b. webpack 生成的模块 id (module id)
+- a. 包含的模块的源代码
+- b. webpack 生成的模块 id (module id) (包括包含的模块 id, 以及该模块引用的依赖模块的 id)
 - c. webpack 用于启动运行的 bootstrap runtime
+- d. Chunk ID
 
-这三部分任意一部分发生变化，生成的分块文件就不一样了，缓存当然也没用了。
+这四部分任意一部分发生变化，生成的分块文件就不一样了，缓存当然也没用了。
 
 具体的呢，有这么一些情况会导致缓存失效：
 
@@ -54,22 +76,26 @@ webpack 默认使用数字类型的模块 id，比如下面这样的编译结果
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 	__webpack_require__(1);
-	var entry_1 = true;
+	module.exports = 'entry_1.js';
 
 /***/ },
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 	__webpack_require__(2);
-	var test_1 = true;
+	module.exports = 'test_1.js';
 /***/ },
 /* 2 */
 /***/ function(module, exports) {
-	var test_2 = true;
+	module.exports = 'test_2.js';
 /***/ }
 /******/ ])
 ```
 
-一看就知道，这样的模块 id 跟模块引入的顺序有关。假设新增/删除一个模块引用，或者依赖的顺序变一下，计算结果就可能变化，导致一些模块 id 发生变化，最终导致输出 chunk 变化，缓存失效。
+这里面注释中的 `/* 0 */ ... /* 1 */ ...` 就是该模块对应的 id (看上去不明显, 因为 webpack 取了个巧, 把它跟数组索引一一对应。实际上如果无法一一对应的话, webpack 就会转为生成一个 map 对象)。
+
+同时, 影响分块内容的还有模块内部引用的依赖模块的 id。比如这里第一个模块 "entry_1.js" 里的代码: `__webpack_require__(1);`, 引用了依赖模块 "test_1.js" 的 id。
+
+一看就知道，这样的模块 id 跟每次编译时候模块引入的顺序有关。假设新增/删除一个模块引用，或者依赖的顺序变一下，计算结果就可能变化，导致一些模块 id 发生变化，最终导致输出 chunk 变化，缓存失效。这一条几乎会导致所有输出的分块内容都发生变化。
 
 ### c. webpack bootstrap runtime 变动
 
@@ -185,15 +211,41 @@ webpack 默认使用数字类型的模块 id，比如下面这样的编译结果
 
 ##### 1. 引入的是公共分块 (common chunk)
 
-webpack runtime 从入口分块 (entry chunk) 中移到公共分块，使用时先加载公共分块 (runtime 所在分块)，再加载入口分块 (这时仅包含模块定义)。
+webpack runtime 从入口分块 (entry chunk) 中移到公共分块 (准确的说是最后一个公共分块)，使用时先加载公共分块 (runtime 所在分块)，再加载入口分块 (这时仅包含模块定义)。
 
-由于公共分块的模块是从多个入口分块中分离出来的，其中的文件名映射包含了所有这些入口分块。也就是说，几乎任何文件发生变化，公共分开也会跟着变化。也就是说，每一次上线公共代码的缓存都会失效。
+由于公共分块的模块是从多个入口分块中分离出来的，其中的文件名映射包含了所有这些入口分块。也就是说，几乎任何文件发生变化，公共分块也会跟着变化。也就是说，每一次上线公共代码的缓存都会失效。
 
 ##### 2. 引入的是按需加载分块
 
 假设是通过类似 `require.ensure()` 引入的按需加载的分块，对应的分块文件映射只存在对应的入口分块 runtime 中，按需加载代码的修改会导致引入它的文件缓存失效。
 
-### d. `extract-text-webpack-plugin` 带来的 js/css 改动互相影响
+### d. Chunk ID 变动
+
+在上面的代码里, 展示了存在多个分块下 webpack runtime 多了一个文件映射, 以及按需加载函数。包含 runtime 的称为入口分块 (entry chunk), 与之对应还存在只定义模块的分块:
+
+```javascript
+webpackJsonp([0,1],[
+/* 0 */
+/***/ function(module, exports, __webpack_require__) {
+
+	__webpack_require__(1);
+	module.exports = 'entry.js';
+
+/***/ },
+/* 1 */
+/***/ function(module, exports) {
+
+	module.exports = 'test.js';
+
+/***/ }
+]);
+```
+
+这里函数调用的第一个参数 `[0,1]` 就对应了这个分块的 id (有可能是单个id, 也有可能像这样对应了多个)。
+
+同模块 id 一样, 分块 id 的计算与分块引入顺序有关, 比如配置里少定义一个分块, 其他分块的 id 就会受到影响。
+
+### e. `extract-text-webpack-plugin` 带来的 js/css 改动互相影响
 
 这算是这个插件额外附带的一个问题。
 
@@ -201,11 +253,11 @@ webpack 中只存在 js 模块，不存在 css 或其他模块依赖，所以实
 
 # 怎么改？
 
-咱们来针对上面说的这些一条一条的解决。
+咱们来针对上面说的这些一条一条的解决, 尽可能避免不必要的改动。
 
 ### a. 源代码变动？
 
-不改。没法改。改了就错了。
+这个该变还得变, 忽略。
 
 ### b. webpack 生成的模块 id 变动？
 
@@ -219,6 +271,10 @@ webpack 已经内置了这个把文件路径当做 id 的插件: `NamedModulesPl
     plugins: [new webpack.NamedModulesPlugin()]
 }
 ```
+
+不要担心文件体积变大，已经验证过 gzip 之后体积甚至比原来还小。
+
+当然，如果你不希望暴露文件名，可以替换为文件路径的 hash 值。webpack 2.0 中已经有了 `HashedModuleIdsPlugin`, 不再多说。
 
 ### c. webpack bootstrap runtime 变动？
 
@@ -285,14 +341,23 @@ window.webpackManifest = {...};// 内联 chunk-manifest.json
 /******/ 		}
 ```
 
-### d. `extract-text-webpack-plugin` 带来的 js/css 改动互相影响？
+### d. Chunk ID 变化?
+
+这个不改了。影响也不大。实际情况中分块的个数的顺序在多次编译之间大多都是固定的, 不太容易发生变化。
+
+### e. `extract-text-webpack-plugin` 带来的 js/css 改动互相影响？
 
 对于 css，`extract-text-webpack-plugin` 提供了 `contenthash` 的文件名选项，按输出的 css 内容独立计算 hash，这就没啥问题了。
 
-换到 js 呢？也差不多，咱们可以通过 `webpack-md5-hash` 插件，替换默认的 hash 计算方式，改为按模块内容计算 hash。但实际上没这么容易，之前说过，不同于 css 输出，js 打包后一部分是模块源代码内容，一部分是模块 id，一部分是 webpack runtime。这个插件只能考虑到模块内容这一条，很容易出现错误，也就是打包内容不一致，但 hash 一致，所以**使用起来一定要慎重**，考虑周全：
+换到 js 呢？一样的思路, 手动根据分块内容重新计算 chunk hash 就可以了。<s>咱们可以通过 `webpack-md5-hash` 插件替换默认的 hash 计算方式。但实际上没这么容易，之前说过，不同于 css 输出，js 打包后一部分是模块源代码内容，一部分是模块 id，一部分是 webpack runtime。这个插件只能考虑到模块内容这一条，很容易出现错误，也就是打包内容不一致，但 hash 一致，所以**使用起来一定要慎重**，考虑周全：
 
 - 模块 id 部分：咱们之前提到了 `NamedModulesPlugin` 可以固定 id，跟这个插件搭配简直完美。这一条解决
 - webpack runtime 部分 (针对引入了文件名映射导致 runtime 会变动的情况)：这个没办法，对于会引入可变 runtime 的 chunk 绝不能依赖于这个插件生成的 hash。不过我们之前把 runtime 可变信息提出来内联到 html 了，所以这一条也不是问题。（**注：用了这个插件，待文件名信息的 runtime 必须内联**）
+</s>
+
+发现还有一个 Chunk ID 还是没有考虑进去, `webpack-md5-hash` 这个插件只考虑了模块源代码, 实在是太简陋的, 我只能说, 不要碰, 否则你最终会在线上发布的问题上背锅。
+
+请使用[重新实现的 md5-hash-webpack-plugin](https://github.com/adventure-yunfei/md5-hash-webpack-plugin), 考虑了上面列出的除了 webpack runtime 之外的所有项 (模块 id, 模块的依赖模块id, 模块源代码, 最终 Chunk ID)。你只需要将 webpack runtime (或者仅其中的文件映射manifest) 内联即可。
 
 # 总结一下最后的 webpack 配置
 
@@ -312,14 +377,14 @@ window.webpackManifest = {...};// 内联 chunk-manifest.json
         new ExtractTextWebpackPlugin({filename: '[name].[contenthash].css'}),
 
         // 按实际内容计算 hash
-        new WebpackMD5Hash()
+        new MD5HashWebpackPlugin()
     ]
 }
 ```
 
 # 引用参考
 
-- [`webpack`](https://github.com/webpack/webpack)
-- [`extract-text-webpack-plugin`](https://github.com/webpack-contrib/extract-text-webpack-plugin)
-- [`chunk-manifest-webpack-plugin`](https://github.com/soundcloud/chunk-manifest-webpack-plugin)
-- [`webpack-md5-hash`](https://github.com/erm0l0v/webpack-md5-hash)
+- [webpack](https://github.com/webpack/webpack)
+- [extract-text-webpack-plugin](https://github.com/webpack-contrib/extract-text-webpack-plugin)
+- [chunk-manifest-webpack-plugin](https://github.com/soundcloud/chunk-manifest-webpack-plugin)
+- [webpack-md5-hash](https://github.com/erm0l0v/webpack-md5-hash)

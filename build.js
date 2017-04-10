@@ -1,14 +1,26 @@
 var child_process = require('child_process'),
     fs = require('fs-extra'),
+    path = require('path'),
     commander = require('commander'),
     _ = require('underscore'),
-    Mustache = require('mustache'),
+    handlebars = require('handlebars'),
     nodeExecCmd = require('node-exec-cmd'),
     config = require('./config.json');
 
+handlebars.registerHelper('equal', function (a, b, options) {
+    if (a === b) {
+        return options.fn(this);
+    } else {
+        return options.inverse(this);
+    }
+});
+
 var PROJ_ROOT = __dirname,
+    CWD = process.cwd(),
     uwsgi_ini_file = PROJ_ROOT + '/django/djproj-uwsgi.ini',
-    uwsgi_pid_file = PROJ_ROOT + '/django/djproj-uwsgi.pid';
+    uwsgi_pid_file = PROJ_ROOT + '/django/djproj-uwsgi.pid',
+    LOGS_DIR = path.resolve(PROJ_ROOT, 'logs'),
+    nginxLogDir = path.resolve(LOGS_DIR, 'nginx');
 
 function log(msg) { console.log(msg); }
 function logCmd(cmd) {
@@ -22,14 +34,16 @@ function execAsync(cmd, args, options) {
     });
 }
 function renderTemplateFile(filepath, context) {
-    return new Promise(function (resolve, reject) {
-        fs.readFile(filepath, 'utf8', function (err, data) {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(Mustache.render(data, context));
-            }
-        });
+    return Promise.resolve().then(function () {
+        var fileContent = fs.readFileSync(filepath, 'utf8');
+        return handlebars.compile(fileContent)(context);
+    });
+}
+function renderTemplateFile2(filepath, outputPath, context) {
+    return Promise.resolve().then(function () {
+        var fileContent = fs.readFileSync(filepath, 'utf8');
+        var output = handlebars.compile(fileContent)(context);
+        fs.writeFileSync(outputPath, output);
     });
 }
 function onMainCommandFailure(err) {
@@ -49,6 +63,18 @@ function getProp(obj, propPaths) {
         }
     });
     return val;
+}
+
+function prepareLogsDir() {
+    var logsDirs = [
+        nginxLogDir
+    ];
+    return Promise.resolve().then(() => {
+        logsDirs.forEach(logDir => {
+            fs.ensureDirSync(logDir);
+            fs.chmodSync(logDir, 0775);
+        });
+    });
 }
 
 var RELEASE_DIR = PROJ_ROOT + '/release';
@@ -189,6 +215,7 @@ commander
     .description('启动服务器')
     .action(function () {
         return Promise.resolve()
+            .then(prepareLogsDir)
             .then(function () {
                 log('# 启动服务前, 首先请确保 nginx(apache) 配置文件已设置.\n');
                 log('# 启动服务器前首先关闭服务器:');
@@ -254,7 +281,7 @@ commander
                 return Promise.resolve().then(function () {
                     fs.accessSync(uwsgi_pid_file);
                 }).then(function () {
-                    return execAsync('uwsgi', ['--stop', uwsgi_pid_file]);
+                    return execAsync('uwsgi', ['--stop', uwsgi_pid_file]).catch(() => {});
                 }, function () {});
             })
             .catch(onMainCommandFailure);
@@ -262,77 +289,45 @@ commander
 
 
 commander
-    .command('nginx-config')
-    .description('生成整个Pluto工程的运行于Nginx上的配置文件')
-    .option('-o --output', 'Nginx配置输出文件')
+    .command('config')
+    .description('生成整个Pluto工程的运行配置文件 (nginx, logstash)')
     .action(function () {
-        var outputFile = this.output || 'pluto-nginx-config',
-            hosts = config.hosts,
-            cfgStr = '',
-            templatesDir = PROJ_ROOT + '/build-resources/nginx-config-templates',
-            addConfigStr = function (renderedConfig) {
-                cfgStr += renderedConfig;
-            };
-
+        var nginxConfFile = path.resolve(PROJ_ROOT, 'pluto-nginx.conf');
+        var logstashConfFile = path.resolve(PROJ_ROOT, 'pluto-logstash.conf');
+        var nginxLogDir = path.resolve(PROJ_ROOT, 'logs/nginx');
+        var templateDir = path.resolve(PROJ_ROOT, 'build-resources');
         return Promise.resolve()
-            .then(checkConfigFile)
+            .then(() => log('# 开始生成配置文件...'))
             .then(function () {
-                addConfigStr([
-                    '# Config for STATIC:',
-                    'server {',
-                    '    listen      ' + hosts.static.by_port + ';',
-                    '    root        ' + PROJ_ROOT + '/static;',
-                    '}',
-                    ''
-                ].join('\n'));
-            })
-            .then(function () {
-                addConfigStr('# Config for Django:\n');
-                return renderTemplateFile(templatesDir + '/django', _.assign({}, hosts.django, {
-                    root: PROJ_ROOT + '/django'
-                })).then(addConfigStr);
-            })
-            .then(function () {
-                addConfigStr('# Config for gitblog:\n');
-                return renderTemplateFile(templatesDir + '/gitblog', _.assign({}, hosts.gitblog, {
-                    root: PROJ_ROOT + '/blog'
-                })).then(addConfigStr);
-            })
-            .then(function () {
-                addConfigStr('# Proxy to map domain to port:\n');
-                return Promise.all(_.values(hosts).map(function (host) {
-                    if (host.by_port) {
-                        return renderTemplateFile(templatesDir + '/domain-to-port-proxy', host).then(addConfigStr);
+                return renderTemplateFile2(
+                    path.resolve(PROJ_ROOT, 'build-resources/pluto-nginx.conf'),
+                    nginxConfFile,
+                    {
+                        config: config,
+                        root: PROJ_ROOT,
+                        nginx_log_dir: nginxLogDir
                     }
-                }));
+                ).then(() => log('  - Nginx 配置生成完成: ' + nginxConfFile));
             })
             .then(function () {
-                addConfigStr([
-                    '# Config for entrance:',
-                    'server {',
-                    '    listen      80;',
-                    '    server_name ' + config.default_domain + ';',
-                    '    root        ' + PROJ_ROOT + '/root-domain-pages;',
-                    '}',
-                    'server {',
-                    '    listen      80;',
-                    '    server_name *.yunfei.me;',
-                    '    return 301 $scheme://' + config.default_domain + '$request_uri;',
-                    '}',
-                    ''
-                ].join('\n'));
+                return renderTemplateFile2(
+                    path.resolve(templateDir, 'django-uwsgi.ini'),
+                    uwsgi_ini_file,
+                    {
+                        root: path.resolve(PROJ_ROOT, 'django')
+                    }
+                ).then(() => log('  - Django uWSGI 配置生成完成: ' + uwsgi_ini_file))
             })
             .then(function () {
-                fs.writeFileSync(outputFile, cfgStr);
-                log('# Nginx 配置生成完成: ' + outputFile);
+                return renderTemplateFile2(
+                    path.resolve(templateDir, 'pluto-logstash.conf'),
+                    logstashConfFile,
+                    {
+                        nginx_log_dir: nginxLogDir
+                    }
+                ).then(() => log('  - Logstash 配置生成完成: ' + logstashConfFile));
             })
-            .then(function () {
-                return renderTemplateFile(templatesDir + '/django-uwsgi.ini', {root: PROJ_ROOT + '/django'})
-                    .then(function (uwsgiINI) {
-                        fs.writeFileSync(uwsgi_ini_file, uwsgiINI);
-                        log('# Django uWSGI 配置生成完成: ' + uwsgi_ini_file);
-                    });
-            })
+            .then(() => log('# 配置文件全部生成完成'))
             .catch(onMainCommandFailure);
     });
 

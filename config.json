@@ -21,6 +21,10 @@
       "by_port": 12194,
       "by_domain": "killers.yunfei.me",
       "has_websocket": true
+    },
+    "kibana": {
+      "by_port": 5601,
+      "by_domain": "kibana.yunfei.me"
     }
   },
 

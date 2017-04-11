@@ -101,7 +101,7 @@ function checkConfigFile() {
         if (!subData) {
             missedKeys.push(prefix + key);
         } else if (_.isObject(subData)) {
-            return Object.keys(subData).every(subKey => validateKey(subData, subKey, `${key}.`));
+            return Object.keys(subData).forEach(subKey => validateKey(subData, subKey, `${key}.`));
         }
     };
     REQUIRED_CONFIG_KEYS.forEach(key => validateKey(config, key));

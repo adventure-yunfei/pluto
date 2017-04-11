@@ -25,8 +25,8 @@ typings/
 *.pyo
 
 # build script
-/pluto-apache-config.conf
-/pluto-nginx-config
+/pluto-nginx.conf
+/pluto-logstash.conf
 /django/djproj-uwsgi.ini
 /django/djproj-uwsgi.pid
 /root-domain-pages/ts-entry-static/

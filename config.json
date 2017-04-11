@@ -28,7 +28,6 @@
 
   "__README__": "以下需要在部署环境手动指定",
   "blog": {
-    "__README__": "移步配置文件: 'conf.yaml'",
     "duoshuo": "",
     "baiduAnalytics": ""
   },

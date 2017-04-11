@@ -33,13 +33,7 @@ function execAsync(cmd, args, options) {
         bg: !!options && !!options.runOnBackground
     });
 }
-function renderTemplateFile(filepath, context) {
-    return Promise.resolve().then(function () {
-        var fileContent = fs.readFileSync(filepath, 'utf8');
-        return handlebars.compile(fileContent)(context);
-    });
-}
-function renderTemplateFile2(filepath, outputPath, context) {
+function renderTemplateFile(filepath, outputPath, context) {
     return Promise.resolve().then(function () {
         var fileContent = fs.readFileSync(filepath, 'utf8');
         var output = handlebars.compile(fileContent)(context);
@@ -52,17 +46,6 @@ function onMainCommandFailure(err) {
 }
 function chdir(dir) {
     process.chdir(dir);
-}
-function getProp(obj, propPaths) {
-    var val = obj;
-    propPaths.some(function (key) {
-        if (typeof val === 'object') {
-            val = val[key];
-        } else {
-            return true;
-        }
-    });
-    return val;
 }
 
 function prepareLogsDir() {
@@ -77,21 +60,51 @@ function prepareLogsDir() {
     });
 }
 
+function configYaml(filepath, conf) {
+    return Promise.resolve().then(() => {
+        let lines = fs.readFileSync(filepath, 'utf8').split('\n'); 
+        for (let key in conf) {
+            let val = conf[key];
+            let idx = lines.findIndex(line => {
+                let _key = (line.split(':')[0] || '').trim();
+                return _key === key;
+            });
+            let foundKey = false;
+            lines = lines.map(line => {
+                let _key = (line.split(':')[0] || '').trim();
+                if (_key === key) {
+                    foundKey = true;
+                    return `${line.slice(0, line.indexOf(key))}${key}: ${val}`;
+                } else {
+                    return line;
+                }
+            });
+            if (!foundKey) {
+                throw new Error(`configYaml: ${filepath} - 未找到指定的配置项: ${key}`);
+            }
+        }
+        fs.writeFileSync(filepath, lines.join('\n'));
+    });
+}
+
 var RELEASE_DIR = PROJ_ROOT + '/release';
 
 function checkConfigFile() {
     var REQUIRED_CONFIG_KEYS = [
-        'default_domain',
-        //'blog.duoshuo',
-        //'blog.baiduAnalytics',
-        'django-photosite.baidu-access-key',
-        'django-photosite.baidu-secret-key',
-        'django-photosite.baiduAnalytics',
-        'react-photosite.baiduAnalytics'
+        'blog',
+        'django-photosite',
+        'react-photosite'
     ];
-    var missedKeys = REQUIRED_CONFIG_KEYS.filter(function (keyPath) {
-        return !getProp(config, keyPath.split('.'));
-    });
+    var missedKeys = [];
+    var validateKey = (data, key, prefix = '') => {
+        var subData = data && data[key];
+        if (!subData) {
+            missedKeys.push(prefix + key);
+        } else if (_.isObject(subData)) {
+            return Object.keys(subData).every(subKey => validateKey(subData, subKey, `${key}.`));
+        }
+    };
+    REQUIRED_CONFIG_KEYS.forEach(key => validateKey(config, key));
     if (missedKeys.length) {
         throw new Error('缺失必需的配置项: ' + missedKeys.join(' , '));
     }
@@ -298,8 +311,10 @@ commander
         var templateDir = path.resolve(PROJ_ROOT, 'build-resources');
         return Promise.resolve()
             .then(() => log('# 开始生成配置文件...'))
+            .then(checkConfigFile)
             .then(function () {
-                return renderTemplateFile2(
+                log(`  - 生成 Nginx 配置 (${nginxConfFile}) ...`);
+                return renderTemplateFile(
                     path.resolve(PROJ_ROOT, 'build-resources/pluto-nginx.conf'),
                     nginxConfFile,
                     {
@@ -307,25 +322,37 @@ commander
                         root: PROJ_ROOT,
                         nginx_log_dir: nginxLogDir
                     }
-                ).then(() => log('  - Nginx 配置生成完成: ' + nginxConfFile));
+                );
             })
             .then(function () {
-                return renderTemplateFile2(
+                log('  - 生成 Django uWSGI 配置...');
+                return renderTemplateFile(
                     path.resolve(templateDir, 'django-uwsgi.ini'),
                     uwsgi_ini_file,
                     {
                         root: path.resolve(PROJ_ROOT, 'django')
                     }
-                ).then(() => log('  - Django uWSGI 配置生成完成: ' + uwsgi_ini_file))
+                );
             })
             .then(function () {
-                return renderTemplateFile2(
+                log(`  - 生成 Logstash 配置 (${logstashConfFile}) ...`);
+                return renderTemplateFile(
                     path.resolve(templateDir, 'pluto-logstash.conf'),
                     logstashConfFile,
                     {
                         nginx_log_dir: nginxLogDir
                     }
-                ).then(() => log('  - Logstash 配置生成完成: ' + logstashConfFile));
+                );
+            })
+            .then(function () {
+                log('  - 调整 blog 配置 (conf.yaml) ...');
+                return configYaml(
+                    path.resolve(PROJ_ROOT, 'blog/conf.yaml'),
+                    {
+                        duoshuo: config.blog.duoshuo,
+                        baiduAnalytics: config.blog.baiduAnalytics
+                    }
+                );
             })
             .then(() => log('# 配置文件全部生成完成'))
             .catch(onMainCommandFailure);

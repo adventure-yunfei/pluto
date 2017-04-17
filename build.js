@@ -154,6 +154,7 @@ commander
                             name: 'killers',
                             script: 'main.js',
                             env: {
+                                BIND_IP: '127.0.0.1',
                                 PORT: killersHost.by_port,
                                 ROOT_URL: 'http://' + killersHost.by_domain,
                                 MONGO_URL: 'mongodb://127.0.0.1:27017/killers-game'

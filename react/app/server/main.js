@@ -60,6 +60,6 @@ app.use('/static', express.static('static'));
 app.use('/game2048', (req, res, next) => render(req, res, next, {checkLogin: false}));
 app.get('*', render);
 
-app.listen(config.port, function () {
+app.listen(config.port, '127.0.0.1', function () {
     console.log('server started for ' + config.port); // eslint-disable-line no-console
 });

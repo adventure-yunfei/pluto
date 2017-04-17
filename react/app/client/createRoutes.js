@@ -10,7 +10,6 @@ import Home from './photo/pages/home/Home';
 import About from './photo/pages/about/About';
 import Photography from './photo/pages/photography/Photography';
 import {CreatePhotography, EditPhotography} from './photo/pages/publish-photography/PublishPhotography';
-import NotFound from './photo/pages/not-found/NotFound';
 import Login from './photo/pages/login/Login';
 import Logout from './photo/pages/logout/Logout';
 
@@ -44,7 +43,6 @@ export default function createRoutes(getState) {
                     </Route>
                 </Route>
             </Route>
-            <Route path="*" component={NotFound}/>
         </Route>
     );
 }

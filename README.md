@@ -22,6 +22,16 @@
 
 - `node build server`
 
+# 启动额外的服务
+
+#### Elasticsearch, Logstash, Kibana, MetricBeat 日志分析服务
+
+- 拷贝生成的 logstash, metricbeat 配置文件
+- 依次启动服务: Elasticsearch, Kibana, Logstash, MetricBeat
+- 生成 `.espasswd` 密码文件, 为 kibana 服务的外部访问设置密码 (外部访问已配置在nginx中):
+    - 安装 `apache2-utils`
+    - 根目录下创建密码文件: `htpasswd -c /etc/nginx/.htpasswd`
+
 # 注意事项
 
 #### 生产环境部署务必确保各个内部服务端口仅本机可用, 不对外暴露

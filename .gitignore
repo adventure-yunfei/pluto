@@ -27,6 +27,7 @@ typings/
 # build script
 /pluto-nginx.conf
 /pluto-logstash.conf
+/metricbeat.yml
 /django/djproj-uwsgi.ini
 /django/djproj-uwsgi.pid
 /root-domain-pages/ts-entry-static/

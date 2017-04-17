@@ -1,0 +1,28 @@
+metricbeat.modules:
+- module: system
+  metricsets:
+    - cpu
+    - load
+    - core
+    - diskio
+    - filesystem
+    - fsstat
+    - memory
+    - network
+    - process
+    #- socket
+  enabled: true
+  period: 10s
+  processes: ['.*']
+
+output.elasticsearch:
+  #enabled: true
+  hosts: ["localhost:9200"]
+  index: "metricbeat-%{+xxxx.ww}"
+
+logging.to_files: true
+logging.files:
+  # Configure the path where the logs are written. The default is the logs directory
+  # under the home path (the binary location).
+  #path: /var/log/metricbeat
+

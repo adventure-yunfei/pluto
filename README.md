@@ -20,4 +20,17 @@
 
 #### 3. 编译 & 启动服务器
 
-- `node build run`
+- `node build server`
+
+# 注意事项
+
+#### 生产环境部署务必确保各个内部服务端口仅本机可用, 不对外暴露
+
+- react 图片站服务
+- django 图片站服务
+- blog 博客服务
+- static 静态文件服务
+- meteor 狼人杀服务
+- elasticsearch, logstash, kibana, metricbeat 日志分析服务
+- mysql 服务
+- mongodb 服务

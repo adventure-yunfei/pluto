@@ -308,6 +308,7 @@ commander
     .action(function () {
         var nginxConfFile = path.resolve(PROJ_ROOT, 'pluto-nginx.conf');
         var logstashConfFile = path.resolve(PROJ_ROOT, 'pluto-logstash.conf');
+        var metricbeatConfFile = path.resolve(PROJ_ROOT, 'metricbeat.yml');
         var nginxLogDir = path.resolve(PROJ_ROOT, 'logs/nginx');
         var templateDir = path.resolve(PROJ_ROOT, 'build-resources');
         return Promise.resolve()
@@ -343,6 +344,13 @@ commander
                     {
                         nginx_log_dir: nginxLogDir
                     }
+                );
+            })
+            .then(function () {
+                log(`  - 生产 MetricBeat 配置 (${metricbeatConfFile}) ...`);
+                return renderTemplateFile(
+                    path.resolve(templateDir, 'metricbeat.yml'),
+                    metricbeatConfFile
                 );
             })
             .then(function () {

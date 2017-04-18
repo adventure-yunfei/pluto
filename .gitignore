@@ -33,3 +33,7 @@ typings/
 /root-domain-pages/ts-entry-static/
 /root-domain-pages/index.html
 /release/
+# runtime
+/.runtime/
+/logs/
+.espasswd

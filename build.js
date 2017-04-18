@@ -17,10 +17,12 @@ handlebars.registerHelper('equal', function (a, b, options) {
 
 var PROJ_ROOT = __dirname,
     CWD = process.cwd(),
-    uwsgi_ini_file = PROJ_ROOT + '/django/djproj-uwsgi.ini',
-    uwsgi_pid_file = PROJ_ROOT + '/django/djproj-uwsgi.pid',
+    uwsgi_ini_file = path.resolve(PROJ_ROOT, 'django/djproj-uwsgi.ini'),
+    uwsgi_pid_file = path.resolve(PROJ_ROOT, 'django/djproj-uwsgi.pid'),
+    RUNTIME_DIR = path.resolve(PROJ_ROOT, '.runtime'),
     LOGS_DIR = path.resolve(PROJ_ROOT, 'logs'),
-    nginxLogDir = path.resolve(LOGS_DIR, 'nginx');
+    LOGSTASH_SINCEDB_DIR = path.resolve(RUNTIME_DIR, 'sincedb'),
+    NGINX_LOG_DIR = path.resolve(LOGS_DIR, 'nginx');
 
 function log(msg) { console.log(msg); }
 function logCmd(cmd) {
@@ -48,16 +50,24 @@ function chdir(dir) {
     process.chdir(dir);
 }
 
-function prepareLogsDir() {
+// 准备各种运行时目录
+function prepareRuntimeDir() {
     var logsDirs = [
-        nginxLogDir
+        NGINX_LOG_DIR
     ];
-    return Promise.resolve().then(() => {
-        logsDirs.forEach(logDir => {
-            fs.ensureDirSync(logDir);
-            fs.chmodSync(logDir, 0775);
-        });
-    });
+    return Promise.all([
+        Promise.resolve().then(() => {
+            logsDirs.forEach(logDir => {
+                fs.ensureDirSync(logDir);
+                fs.chmodSync(logDir, 0755); // logstash读取日志文件需要文件的read权限, 以及文件夹的exec权限
+            });
+        }),
+
+        Promise.resolve().then(() => {
+            fs.ensureDirSync(LOGSTASH_SINCEDB_DIR);
+            fs.chmodSync(LOGSTASH_SINCEDB_DIR, 0777);
+        })
+    ]);
 }
 
 function configYaml(filepath, conf) {
@@ -229,7 +239,7 @@ commander
     .description('启动服务器')
     .action(function () {
         return Promise.resolve()
-            .then(prepareLogsDir)
+            .then(prepareRuntimeDir)
             .then(function () {
                 log('# 启动服务前, 首先请确保 nginx(apache) 配置文件已设置.\n');
                 log('# 启动服务器前首先关闭服务器:');
@@ -309,7 +319,6 @@ commander
         var nginxConfFile = path.resolve(PROJ_ROOT, 'pluto-nginx.conf');
         var logstashConfFile = path.resolve(PROJ_ROOT, 'pluto-logstash.conf');
         var metricbeatConfFile = path.resolve(PROJ_ROOT, 'metricbeat.yml');
-        var nginxLogDir = path.resolve(PROJ_ROOT, 'logs/nginx');
         var templateDir = path.resolve(PROJ_ROOT, 'build-resources');
         return Promise.resolve()
             .then(() => log('# 开始生成配置文件...'))
@@ -322,7 +331,7 @@ commander
                     {
                         config: config,
                         root: PROJ_ROOT,
-                        nginx_log_dir: nginxLogDir
+                        nginx_log_dir: NGINX_LOG_DIR
                     }
                 );
             })
@@ -342,7 +351,8 @@ commander
                     path.resolve(templateDir, 'pluto-logstash.conf'),
                     logstashConfFile,
                     {
-                        nginx_log_dir: nginxLogDir
+                        nginx_log_dir: NGINX_LOG_DIR,
+                        sincedb_dir: LOGSTASH_SINCEDB_DIR
                     }
                 );
             })

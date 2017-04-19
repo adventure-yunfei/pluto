@@ -21,7 +21,7 @@
     var hosts = globalConfig.hosts,
         defaultMenus = [{
             text: 'React',
-            host: 'http://' + hosts.react.by_domain,
+            host: '//' + hosts.react.by_domain,
             subMenus: [{
                 text: '摄影',
                 href: '/'
@@ -34,14 +34,16 @@
             }]
         }, {
             text: '博客',
-            host: 'http://' + hosts.gitblog.by_domain,
-            href: '/'
+            href: '//' + hosts.gitblog.by_domain,
         }, {
             text: 'Github',
             href: 'https://github.com/adventure-yunfei',
         }, {
+            text: 'ElasticSearch Log',
+            href: '//' + hosts.kibana.by_domain,
+        }, {
             text: 'Django',
-            host: 'http://' + hosts.django.by_domain,
+            host: '//' + hosts.django.by_domain,
             deprecated: true,
             subMenus: [{
                 text: '摄影',

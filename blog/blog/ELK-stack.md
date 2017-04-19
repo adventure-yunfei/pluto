@@ -125,6 +125,7 @@ output {
 - 检查文件权限！Logstash以service形式启动时，其默认用户为`logstash`，访问nginx日志文件被拒。但是其启动时并不会提示文件权限不足！
     - 解决方案1: `chmod` 更改目标文件权限
     - 解决方案2: `/etc/default/logstash` => `LS_USER` 更改Logstash服务运行的用户
+- 同时检查文件夹权限! Logstash 在使用通配符访问文件时, 需要该目录的执行权限(-x)
 - `input.start_position => beginning` 仅在Logstash第一次读取文件时生效，之后Logstash将自己记录文件读取位置。想让Logstash重新从头开始读文件，删除对应的`$HOME/.sincedb...`读取位置记录文件即可
 
 

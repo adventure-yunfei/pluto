@@ -382,7 +382,7 @@ commander
     .command('bandwidth')
     .description('限制带宽配额')
     .action(function () {
-        var Quota = 1024 * 1024 * 1024; // 1GB
+        var Quota = 10 * 1024 * 1024 * 1024; // 10GB
         log('# 设置流量配额上限...');
         return Promise.resolve()
             .then(function () {

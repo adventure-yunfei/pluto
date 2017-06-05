@@ -5,7 +5,9 @@
 - Nginx
 - Python 2.7
 - pip
-- uwsgi 2
+- uwsgi 2.0.12
+- mysql
+  - apt package: mysql-server, libmysqlclient-dev
 - Node 4+
 - npm 2~3
 - gulp

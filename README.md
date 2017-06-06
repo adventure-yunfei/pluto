@@ -6,6 +6,8 @@
 - Python 2.7
 - pip
 - uwsgi 2.0.12
+- php5
+  - apt package: php5, php5-fpm, php5-mbstring
 - mysql
   - apt package: mysql-server, libmysqlclient-dev
 - Node 4+

@@ -12,7 +12,7 @@
   - apt package: mysql-server, libmysqlclient-dev
 - Node 4+
 - npm 2~3
-- gulp
+- meteor
 - 如有必要, [配置 npm registry 镜像](https://github.com/adventure-yunfei/easy-git-npm-tools.git)
 
 最后, 在工程根目录下安装npm包: `npm install`, 以启用必要的编译脚本执行环境。
@@ -25,6 +25,10 @@
 #### 3. 编译 & 启动服务器
 
 - `node build server`
+
+### 4. 初次启动工作
+
+- 初始化 django mysql 数据库及 settings.py 里的数据库连接信息
 
 # 启动额外的服务
 

@@ -12,4 +12,4 @@ r = r or os.chdir('static');
 r = r or os.system('npm install');
 r = r or os.system('npm run build');
 
-exit(r)
+exit(r and 1)

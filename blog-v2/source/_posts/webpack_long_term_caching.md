@@ -1,14 +1,12 @@
-<!--
-author: yunfei
-head:
-date: 2017-03-06
+---
 title: Webpack 真正的持久缓存实现
-tags: web, webpack
-images:
-category: log analysis
-status: publish
-summary:
--->
+date: 2017-03-06
+categories:
+- log analysis
+tags:
+- web
+- webpack
+---
 
 说现在 webpack 是目前最流行的前端依赖打包工具，应该没人会有异议吧？不过为了在这个开放的工具上达成自己的最优目的，还是要花不少心思的。这里来讲讲在 webpack 里怎么做到真正的持久缓存。
 
@@ -20,6 +18,8 @@ summary:
 webpack 文档里有一篇非常简单的关于如何做到[持久缓存（Long-term Caching）](https://webpack.github.io/docs/long-term-caching.html)，有多简单？它就只告诉了你一件事：记得在文件名里用 chunkhash。
 
 对此，我无力吐槽。。。在实际的场景里，光用 chunkhash 基本上来说并没有什么卵用，因为还有一堆的情况会导致即使实际上相关代码没变， chunkhash 还是变了。
+
+<!-- more -->
 
 更新：最新的 [webpack 2 的相关文档](https://webpack.js.org/guides/caching/) 已经提及了部分内容，不过还有一些问题没有说到，这篇文章还是很有用的。
 

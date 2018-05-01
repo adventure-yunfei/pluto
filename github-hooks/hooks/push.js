@@ -7,6 +7,7 @@ module.exports = function push(payload) {
   if (/master/.test(payload.ref || '')) {
     logger.info('trigger re-build');
     process.chdir(path.resolve(__dirname, '../..'));
+    child_process.execSync('git pull');
     child_process.execSync('node build.js build');
   }
 }

@@ -26,12 +26,12 @@ app.use('/github-hooks', function (req, res) {
   const eventName = req.header('X-GitHub-Event');
   try {
     runHook(eventName, req.body);
+    res.send('Received');
   } catch (e) {
     logger.error(e && e.toString());
     res.send(500, 'Failed');
     return;
   }
-  res.send('OK');
 });
 
 app.listen(config.hosts['github-hooks'].by_port, '127.0.0.1', () => {

@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "dev": "node server.js"
+  },
+  "devDependencies": {
+    "express": "^4.16.3"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.2"
+  }
+}

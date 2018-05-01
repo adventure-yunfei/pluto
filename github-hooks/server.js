@@ -34,6 +34,6 @@ app.use('/github-hooks', function (req, res) {
   res.send('OK');
 });
 
-app.listen(config.hosts['github-hooks'].by_port, () => {
+app.listen(config.hosts['github-hooks'].by_port, '127.0.0.1', () => {
   console.log('server started.');
 });

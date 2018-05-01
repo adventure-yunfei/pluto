@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "hexo server"
+    "dev": "hexo server",
+    "generate": "hexo generate"
   },
   "hexo": {
     "version": "3.7.1"

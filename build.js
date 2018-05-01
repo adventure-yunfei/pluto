@@ -70,9 +70,20 @@ function prepareRuntimeDir() {
     ]);
 }
 
+function replacePlaceholders(filepath, placeholders) {
+    let content = fs.readFileSync(filepath, 'utf8');
+    Object.keys(placeholders).forEach(phKey => {
+        if (content.indexOf(phKey) === -1) {
+            throw new Error(`replacePlaceholder: placeholder is not found: ${phKey}`);
+        }
+        content = content.replace(phKey, placeholders[phKey]);
+    });
+    fs.writeFileSync(filepath, content);
+}
+
 function configYaml(filepath, conf) {
     return Promise.resolve().then(() => {
-        let lines = fs.readFileSync(filepath, 'utf8').split('\n'); 
+        let lines = fs.readFileSync(filepath, 'utf8').split('\n');
         for (let key in conf) {
             let val = conf[key];
             let idx = lines.findIndex(line => {
@@ -103,7 +114,8 @@ function checkConfigFile() {
     var REQUIRED_CONFIG_KEYS = [
         'blog',
         'django-photosite',
-        'react-photosite'
+        'react-photosite',
+        'hexoblog'
     ];
     var missedKeys = [];
     var validateKey = (data, key, prefix = '') => {
@@ -210,6 +222,19 @@ commander
                     .then(function () {
                         log('  - 编译文件...');
                         return execAsync('npm', ['run', 'gulp', '---', 'build', '-p']);
+                    });
+            })
+            .then(function () {
+                log('# 编译 Hexo Blog 工程...');
+                chdir(path.resolve(PROJ_ROOT, 'blog-v2'));
+                return Promise.resolve()
+                    .then(() => {
+                        log('  - 安装npm包...');
+                        return execAsync('npm', ['install']);
+                    })
+                    .then(() => {
+                        log('  - 生成静态网站...');
+                        return execAsync('npm', ['run', 'generate']);
                     });
             })
             .then(function () {
@@ -364,12 +389,22 @@ commander
                 );
             })
             .then(function () {
-                log('  - 调整 blog 配置 (conf.yaml) ...');
+                log('  - 调整 gitblog 配置 (conf.yaml) ...');
                 return configYaml(
                     path.resolve(PROJ_ROOT, 'blog/conf.yaml'),
                     {
                         duoshuo: config.blog.duoshuo,
                         baiduAnalytics: config.blog.baiduAnalytics
+                    }
+                );
+            })
+            .then(() => {
+                log('  - 调整 hexo blog 配置...');
+                return replacePlaceholders(
+                    path.resolve(PROJ_ROOT, 'blog-v2/themes/landscape/_config.yml'),
+                    {
+                        '#<leancloud-app-id>#': config.hexoblog['leancloud-app-id'],
+                        '#<leancloud-app-key>#': config.hexoblog['leancloud-app-key']
                     }
                 );
             })

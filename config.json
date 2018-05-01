@@ -11,7 +11,7 @@
     },
     "gitblog": {
       "by_port": 12192,
-      "by_domain": "blog.yunfei.me"
+      "by_domain": "gitblog.yunfei.me"
     },
     "react": {
       "by_port": 12193,
@@ -25,6 +25,10 @@
     "kibana": {
       "by_port": 5601,
       "by_domain": "kibana.yunfei.me"
+    },
+    "hexoblog": {
+      "by_port": 12195,
+      "by_domain": "blog.yunfei.me"
     }
   },
 
@@ -34,6 +38,10 @@
   "blog": {
     "duoshuo": "",
     "baiduAnalytics": ""
+  },
+  "hexoblog": {
+    "leancloud-app-id": "",
+    "leancloud-app-key": ""
   },
   "django-photosite": {
     "baidu-access-key": "",

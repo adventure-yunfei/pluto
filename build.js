@@ -230,7 +230,7 @@ commander
                 return Promise.resolve()
                     .then(() => {
                         log('  - 安装npm包...');
-                        return execAsync('npm', ['install']);
+                        return execAsync('yarn');
                     })
                     .then(() => {
                         log('  - 生成静态网站...');

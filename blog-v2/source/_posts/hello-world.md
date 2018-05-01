@@ -1,6 +1,6 @@
 ---
 title: Hello World
-date: 1990/01/01 00:00:00
+date: 1990-01-01
 ---
 Hello Excerpt.
 <!-- more -->

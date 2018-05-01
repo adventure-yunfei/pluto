@@ -8,9 +8,11 @@ tags:
 - virtual_dom
 ---
 
-# 什么是 Virtual DOM 虚拟节点树技术？
-
 React风行一时，其核心技术 Virtual DOM 也引起关注。虽然 React（或是一些其他框架） 的 Virtual DOM 实现非常复杂，但实际上这项技术本身的原理很简单。这篇文章来做个非常粗略的介绍。
+
+<!-- more -->
+
+# 什么是 Virtual DOM 虚拟节点树技术？
 
 首先，Virtual DOM 是什么：
 

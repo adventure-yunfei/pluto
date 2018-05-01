@@ -1,11 +1,9 @@
 ---
 title: Squid + stunnel 搭建HTTP代理
-date: 2017-05-02
+date: 2016-05-02
 tags:
 - proxy
 ---
-
-# squid + stunnel 代理 (需配置stunnel客户端)
 
 原理:
 
@@ -16,6 +14,9 @@ tags:
 连接图： **浏览器** --(http代理)--> **stunnel客户端(国内)** --(stunnel加密连接)--> **服务端stunnel** --(转发)--> **服务端squid** --(squid http代理)--> **内容服务器**
 
 ```
+
+<!-- more -->
+
 ### 服务端配置
 
 ##### 1. 安装 squid, stunnel, openssl

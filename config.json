@@ -29,6 +29,10 @@
     "hexoblog": {
       "by_port": 12195,
       "by_domain": "blog.yunfei.me"
+    },
+    "github-hooks": {
+      "by_port": 12196,
+      "by_domain": "github-hooks.yunfei.me"
     }
   },
 

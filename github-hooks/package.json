@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.3",
+    "log4js": "^2.5.3"
+  }
+}

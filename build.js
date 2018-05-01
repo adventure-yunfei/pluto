@@ -291,6 +291,11 @@ commander
                         chdir(RELEASE_DIR + '/meteor-killers-game/bundle');
                         return execAsync(PROJ_ROOT + '/node_modules/.bin/pm2', ['start', 'pm2-process.json']);
                     })
+                    .then(() => {
+                        log('  - 启动 pm2 - Github Hooks 服务器...');
+                        chdir(PROJ_ROOT);
+                        return execAsync('npm', ['run', 'pm2', '--', 'start', 'github-hooks/server.js', '--name', 'github-hooks']);
+                    })
                     .then(function () {
                         log('  - 启动 django uwsgi...');
                         chdir(PROJ_ROOT + '/django');

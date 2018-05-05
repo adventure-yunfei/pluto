@@ -189,6 +189,29 @@ commander
             .catch(onMainCommandFailure);
     });
 
+function buildBlogProject() {
+    log('# 编译 Hexo Blog 工程...');
+    chdir(path.resolve(PROJ_ROOT, 'blog-v2'));
+    return Promise.resolve()
+        .then(() => {
+            log('  - 安装npm包...');
+            return execAsync('yarn');
+        })
+        .then(() => {
+            log('  - 生成静态网站...');
+            return execAsync('npm', ['run', 'generate']);
+        });
+}
+
+commander
+    .command('build-blog')
+    .description('本地编译博客工程')
+    .action(function () {
+        return buildBlogProject()
+            .catch(onMainCommandFailure);
+    });
+
+
 commander
     .command('build')
     .description('本地编译工程')

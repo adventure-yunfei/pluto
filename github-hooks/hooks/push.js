@@ -27,7 +27,7 @@ module.exports = function push(payload) {
       const buildEnd = () => rebuilding = undefined;
       rebuilding = Promise.resolve()
         .then(() => exec('git pull --ff-only'))
-        .then(() => exec('node build.js build'))
+        .then(() => exec('node build.js build-blog'))
         .then(() => {
           logger.info(`re-build ${triggerTime} succeeded.`);
           rebuilding = undefined;

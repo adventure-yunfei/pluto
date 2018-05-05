@@ -3,6 +3,8 @@ title: 收藏夹
 date: 2016-01-01
 ---
 
+<!-- more -->
+
 - MVVM框架 - React, Angular, Vue ...
     - [MVVM框架性能影响](https://www.zhihu.com/question/31809713/answer/53544875) 
     - [React Fiber - 下一代 React 框架](http://isfiberreadyyet.com/) 

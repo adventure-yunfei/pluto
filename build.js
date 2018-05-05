@@ -196,6 +196,19 @@ commander
         return Promise.resolve()
             .then(checkConfigFile)
             .then(function () {
+                log('# 编译 Hexo Blog 工程...');
+                chdir(path.resolve(PROJ_ROOT, 'blog-v2'));
+                return Promise.resolve()
+                    .then(() => {
+                        log('  - 安装npm包...');
+                        return execAsync('yarn');
+                    })
+                    .then(() => {
+                        log('  - 生成静态网站...');
+                        return execAsync('npm', ['run', 'generate']);
+                    });
+            })
+            .then(function () {
                 log('# 编译 STATIC 工程...');
                 chdir(PROJ_ROOT + '/static');
                 return Promise.resolve().then(function () {
@@ -222,19 +235,6 @@ commander
                     .then(function () {
                         log('  - 编译文件...');
                         return execAsync('npm', ['run', 'gulp', '---', 'build', '-p']);
-                    });
-            })
-            .then(function () {
-                log('# 编译 Hexo Blog 工程...');
-                chdir(path.resolve(PROJ_ROOT, 'blog-v2'));
-                return Promise.resolve()
-                    .then(() => {
-                        log('  - 安装npm包...');
-                        return execAsync('yarn');
-                    })
-                    .then(() => {
-                        log('  - 生成静态网站...');
-                        return execAsync('npm', ['run', 'generate']);
                     });
             })
             .then(function () {

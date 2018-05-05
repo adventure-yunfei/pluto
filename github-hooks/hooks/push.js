@@ -26,7 +26,7 @@ module.exports = function push(payload) {
       process.chdir(path.resolve(__dirname, '../..'));
       const buildEnd = () => rebuilding = undefined;
       rebuilding = Promise.resolve()
-        .then(() => exec('git pull'))
+        .then(() => exec('git pull --ff-only'))
         .then(() => exec('node build.js build'))
         .then(() => {
           logger.info(`re-build ${triggerTime} succeeded.`);

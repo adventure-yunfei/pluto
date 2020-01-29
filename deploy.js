@@ -19,7 +19,7 @@ const _getDeployer = (deployers) => ({
     predeploy() {
         console.log(chalk.green.bold('### 开始生成部署资源...\n'));
 
-        console.log(chalk.green('# 清理资源...'));
+        console.log(chalk.green.bold('# 清理资源...'));
         fse.emptyDirSync(deployRootDir);
 
         deployers
@@ -81,7 +81,7 @@ const _getDeployer = (deployers) => ({
         console.log(chalk.green.bold('# 服务器停止完毕.'));
     },
 
-    buildNginxConfig() {
+    getNginxConfig() {
         return deployers.map(deployer => deployer.getNginxConfig())
             .join('\n\n');
     },
@@ -99,10 +99,15 @@ const getDeployer = () => {
 
     return _getDeployer([
         require('./blog-v2/deploy')({
-            deployRootDir,
             domain: 'blog.yunfei.me',
+            deployRootDir,
             leancloud_app_id: ensureGetConfig('hexoblog.leancloud-app-id'),
             leancloud_app_key: ensureGetConfig('hexoblog.leancloud-app-key'),
+        }),
+
+        require('./static/deploy')({
+            domain: 'static.yunfei.me',
+            deployRootDir,
         }),
     ]);
 }
@@ -117,11 +122,13 @@ yargs
     })
 
     .command('config', '', (yargs) => {}, (argv) => {
-        const nginxConfig = getDeployer().buildNginxConfig();
+        console.log(chalk.green.bold('### 开始生成 Nginx 配置文件...'));
+        const nginxConfig = getDeployer().getNginxConfig();
         fse.outputFileSync(
             path.resolve(__dirname, 'config/pluto-nginx.conf'),
             nginxConfig
         );
+        console.log(chalk.green.bold('### Nginx 配置文件生成完成.'));
     })
 
     .command('server', '', (yargs) => {

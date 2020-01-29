@@ -8,10 +8,8 @@ const utils = require('../deployUtils');
 module.exports = function getDeployer({
     domain,
     deployRootDir,
-    leancloud_app_id,
-    leancloud_app_key,
 }) {
-    const deployDir = path.resolve(deployRootDir, 'blog-v2');
+    const deployDir = path.resolve(deployRootDir, 'static');
 
     function run(cmd) {
         child_process.execSync(cmd, {
@@ -21,25 +19,16 @@ module.exports = function getDeployer({
     }
 
     return {
-        name: 'Hexo Blog',
+        name: 'Static Resources',
 
         predeploy() {
-            console.log(chalk.green('- 准备配置文件...'));
-            utils.replacePlaceholders(
-                path.resolve(__dirname, './themes/landscape/_config.yml'),
-                {
-                    '#<leancloud-app-id>#': leancloud_app_id,
-                    '#<leancloud-app-key>#': leancloud_app_key,
-                }
-            );
-
             console.log(chalk.green('- 安装npm包...'))
             run('yarn');
 
-            console.log(chalk.green('- 生成静态网站...'));
-            run('npm run generate');
+            console.log(chalk.green('- 编译文件...'));
+            run('npm run gulp');
             fse.removeSync(deployDir);
-            fse.moveSync(path.resolve(__dirname, 'public'), deployDir);
+            fse.moveSync(path.resolve(__dirname, 'dist'), path.resolve(deployDir, 'dist'));
         },
 
         postdeploy: false,
@@ -50,7 +39,7 @@ module.exports = function getDeployer({
 
         getNginxConfig() {
             return `
-# Config for hexo blog
+# Config for STATIC
 server {
   listen 80;
   server_name ${domain};

@@ -24,7 +24,7 @@ module.exports = function getDeployer({
         name: 'Hexo Blog',
 
         predeploy() {
-            console.log(chalk.green('- 准备配置文件...'));
+            console.log(chalk.green('- 注入配置文件...'));
             utils.replacePlaceholders(
                 path.resolve(__dirname, './themes/landscape/_config.yml'),
                 {

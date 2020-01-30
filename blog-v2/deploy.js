@@ -42,21 +42,15 @@ module.exports = function getDeployer({
             fse.moveSync(path.resolve(__dirname, 'public'), deployDir);
         },
 
-        postdeploy: false,
-
-        startServer: false,
-
-        stopServer: false,
-
         getNginxConfig() {
-            return `
-# Config for hexo blog
+            return (
+`# Config for hexo blog
 server {
   listen 80;
   server_name ${domain};
   root   ${slash(deployDir)};
-}
-`
+}`
+            );
         }
     };
 };

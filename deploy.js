@@ -5,6 +5,21 @@ const yargs = require('yargs');
 const fse = require('fs-extra');
 const _ = require('lodash');
 
+/*
+deployer: {
+    name: string;
+    predeploy?: func;
+    postdeploy?: func;
+    getNginxConfig?: () => string;
+
+    startServer?: func;
+    stopServer?: func;
+
+    premigrate?: func;
+    postmigrate?: func;
+};
+*/
+
 const rootDir = __dirname;
 const deployRootDir = path.resolve(rootDir, 'release');
 
@@ -82,12 +97,15 @@ const _getDeployer = (deployers) => ({
     },
 
     getNginxConfig() {
-        return deployers.map(deployer => deployer.getNginxConfig())
-            .join('\n\n');
+        return deployers
+            .filter(deployer => deployer.getNginxConfig)
+            .map(deployer => deployer.getNginxConfig())
+            .join('\n\n\n');
     },
 });
 
 const getDeployer = () => {
+    const djangoPort = 12190;
     const deployConfig = require('./deploy.config.json');
     const ensureGetConfig = (configPath) => {
         const val = _.get(deployConfig, configPath);
@@ -108,6 +126,16 @@ const getDeployer = () => {
         require('./static/deploy')({
             domain: 'static.yunfei.me',
             deployRootDir,
+        }),
+
+        require('./react/deploy')({
+            domains: [
+                'photo.yunfei.me',
+                'game2048.yunfei.me',
+            ],
+            port: 12901,
+            deployRootDir,
+            djangoApiServerPort: djangoPort,
         }),
     ]);
 }

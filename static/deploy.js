@@ -3,7 +3,6 @@ const child_process = require('child_process');
 const slash = require('slash');
 const chalk = require('chalk');
 const fse = require('fs-extra');
-const utils = require('../deployUtils');
 
 module.exports = function getDeployer({
     domain,
@@ -31,21 +30,15 @@ module.exports = function getDeployer({
             fse.moveSync(path.resolve(__dirname, 'dist'), path.resolve(deployDir, 'dist'));
         },
 
-        postdeploy: false,
-
-        startServer: false,
-
-        stopServer: false,
-
         getNginxConfig() {
-            return `
-# Config for STATIC
+            return (
+`# Config for STATIC
 server {
   listen 80;
   server_name ${domain};
   root   ${slash(deployDir)};
-}
-`
+}`
+            );
         }
     };
 };

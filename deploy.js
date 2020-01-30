@@ -128,6 +128,10 @@ const getDeployer = () => {
             deployRootDir,
         }),
 
+        require('./django/deploy')({
+            port: djangoPort,
+        }),
+
         require('./react/deploy')({
             domains: [
                 'photo.yunfei.me',
@@ -144,11 +148,9 @@ yargs
     .command('predeploy', '', (yargs) => {}, (argv) => {
         getDeployer().predeploy();
     })
-
     .command('postdeploy', '', (yargs) => {}, (argv) => {
         getDeployer().postdeploy();
     })
-
     .command('config', '', (yargs) => {}, (argv) => {
         console.log(chalk.green.bold('### 开始生成 Nginx 配置文件...'));
         const nginxConfig = getDeployer().getNginxConfig();
@@ -158,18 +160,15 @@ yargs
         );
         console.log(chalk.green.bold('### Nginx 配置文件生成完成.'));
     })
-
     .command('server', '', (yargs) => {
         return yargs
             .command(['$0', 'start'], '', (yargs) => {}, (argv) => {
                 getDeployer().startServer();
             })
-
             .command('stop', '', (yargs) => {}, (argv) => {
                 getDeployer().stopServer();
             });
     })
-
     .alias('-h', '--help')
     .help()
     .argv;

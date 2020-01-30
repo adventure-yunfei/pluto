@@ -1,5 +1,7 @@
 const path = require('path');
+const child_process = require('child_process');
 const chalk = require('chalk');
+const fse = require('fs-extra');
 const utils = require('../deployUtils');
 
 module.exports = function getDeployer({
@@ -31,12 +33,12 @@ module.exports = function getDeployer({
         },
 
         postdeploy() {
-            console.log(chalk.green('- 准备静态资源...'));
+            console.log(chalk.green('- 解压静态资源...'));
             const buildDir = path.resolve(__dirname, 'build');
             fse.removeSync(buildDir);
             fse.moveSync(deployDir, buildDir);
 
-            console.log(chalk.green('- 准备配置文件...'));
+            console.log(chalk.green('- 注入配置文件...'));
             utils.replacePlaceholders(
                 path.resolve(__dirname, './app/server/config.js'),
                 {

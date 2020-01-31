@@ -1,14 +1,10 @@
 import express from 'express';
 import request from 'request';
-import webpack from 'webpack';
-import webpackDevMiddleware from 'webpack-dev-middleware';
-// import webapckHotMiddleware from 'webpack-hot-middleware';
 import compression from 'compression';
 
 import '../lib/polyfill';
 
 import render from './render';
-import makeWebpackConfig from '../../makeWebpackConfig';
 import config from './config';
 
 function createProxy(toUrl, {nocache = false}) {
@@ -43,6 +39,10 @@ app.use(compression());
 // config webpack for hot reloading
 // Since EventSource is not supported in IE, debugging on IE is not supported.
 if (__DEV__) {
+    const webpack = require('webpack');
+    const makeWebpackConfig = require('../../makeWebpackConfig');
+    const webpackDevMiddleware = require('webpack-dev-middleware');
+    // const webapckHotMiddleware = require('webpack-hot-middleware');
     const webpackConfig = makeWebpackConfig(true, true);
     const compiler = webpack(webpackConfig);
     app.use(webpackDevMiddleware(compiler, {

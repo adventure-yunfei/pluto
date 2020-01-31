@@ -10,7 +10,10 @@ module.exports = function getDeployer({
     deployRootDir,
     djangoApiServerPort,
 }) {
-    const deployDir = path.resolve(deployRootDir, 'react');
+    const clientBuildDir = path.resolve(__dirname, 'build');
+    const serverBuildDir = path.resolve(__dirname, 'server-build');
+    const clientDeployDir = path.resolve(deployRootDir, 'react/client');
+    const serverDeployDir = path.resolve(deployRootDir, 'react/server');
 
     function run(cmd) {
         child_process.execSync(cmd, {
@@ -23,21 +26,6 @@ module.exports = function getDeployer({
         name: 'React',
 
         predeploy() {
-            console.log(chalk.green('- 安装npm包...'))
-            run('yarn');
-
-            console.log(chalk.green('- 编译文件...'));
-            run('npm run gulp -- build -p');
-            fse.removeSync(deployDir);
-            fse.moveSync(path.resolve(__dirname, 'build'), deployDir);
-        },
-
-        postdeploy() {
-            console.log(chalk.green('- 解压静态资源...'));
-            const buildDir = path.resolve(__dirname, 'build');
-            fse.removeSync(buildDir);
-            fse.moveSync(deployDir, buildDir);
-
             console.log(chalk.green('- 注入配置文件...'));
             utils.replacePlaceholders(
                 path.resolve(__dirname, './app/server/config.js'),
@@ -46,6 +34,30 @@ module.exports = function getDeployer({
                     '<port>': `${port}`,
                 }
             );
+
+            console.log(chalk.green('- 安装npm包...'))
+            run('yarn');
+
+            console.log(chalk.green('- 编译 client 文件...'));
+            run('npm run gulp -- build -p');
+            fse.moveSync(clientBuildDir, clientDeployDir);
+
+            console.log(chalk.green('- 编译 server 文件...'));
+            run('npm run gulp -- build-server');
+            fse.moveSync(serverBuildDir, serverDeployDir);
+        },
+
+        postdeploy() {
+            console.log(chalk.green('- 解压 client 文件...'));
+            fse.removeSync(clientBuildDir);
+            fse.moveSync(clientDeployDir, clientBuildDir);
+
+            console.log(chalk.green('- 解压 server 文件...'));
+            fse.removeSync(serverBuildDir);
+            fse.moveSync(serverDeployDir, serverBuildDir);
+
+            console.log(chalk.green('- 安装 server npm 依赖...'));
+            run('yarn --production');
         },
 
         getNginxConfig() {
@@ -63,12 +75,12 @@ server {
 
         startServer() {
             console.log(chalk.green('- 启动 pm2 - react 服务器...'));
-            run('npm run gulp -- server -p');
+            run('EXEC_PROD_SERVER=start_server node prod_server_script.js');
         },
 
         stopServer() {
             console.log(chalk.green('- 启动 pm2 - react 服务器...'));
-            run('npm run gulp -- stop-server');
+            run('EXEC_PROD_SERVER=stop_server node prod_server_script.js');
         },
     };
 };

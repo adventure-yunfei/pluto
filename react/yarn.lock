@@ -3343,6 +3343,16 @@ gregorian-calendar@4.x, gregorian-calendar@~4.1.0:
   resolved "https://registry.npmmirror.com/gregorian-calendar/-/gregorian-calendar-4.1.6.tgz#1051b693d6a5e95483ba5f1d10646b9cf6420a03"
   integrity sha512-2GlzWvAPJvKd6Nl3pc3z6Gf1L6E4/NbCn4rufMT2JBgc2Urp2khIePyu45dY0EHPB9ByRV1Vq+WC+XN2JJB1hg==
 
+gulp-babel@7.x:
+  version "7.0.1"
+  resolved "http://npm-registry.qunhequnhe.com/gulp-babel/-/gulp-babel-7.0.1.tgz#b9c8e29fa376b36c57989db820fc1c1715bb47cb"
+  integrity sha512-UqHS3AdxZyJCRxqnAX603Dj3k/Wx6hzcgmav3QcxvsIFq3Y8ZkU7iXd0O+JwD5ivqCc6o0r1S7tCB/xxLnuSNw==
+  dependencies:
+    plugin-error "^1.0.1"
+    replace-ext "0.0.1"
+    through2 "^2.0.0"
+    vinyl-sourcemaps-apply "^0.2.0"
+
 gulp-bg@^0.0.9:
   version "0.0.9"
   resolved "https://registry.npmmirror.com/gulp-bg/-/gulp-bg-0.0.9.tgz#aaf9e18bc22c43b2d0b0d8b8878528fb03581ae8"
@@ -4437,8 +4447,8 @@ merge-descriptors@1.0.1:
 
 merge-stream@^2.0.0:
   version "2.0.0"
-  resolved "https://registry.npmmirror.com/merge-stream/-/merge-stream-2.0.0.tgz#52823629a14dd00c9770fb6ad47dc6310f2c1f60"
-  integrity sha512-abv/qOcuPfk3URPfDzmZU1LKmuw8kT+0nIHvKrKgFrwifol/doWcdA4ZqsWQ8ENrFKkd67Mfpo/LovbIUsbt3w==
+  resolved "https://registry.npm.taobao.org/merge-stream/download/merge-stream-2.0.0.tgz#52823629a14dd00c9770fb6ad47dc6310f2c1f60"
+  integrity sha1-UoI2KaFN0AyXcPtq1H3GMQ8sH2A=
 
 methods@~1.1.2:
   version "1.1.2"
@@ -4964,6 +4974,16 @@ pkg-dir@^4.1.0:
   integrity sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ==
   dependencies:
     find-up "^4.0.0"
+
+plugin-error@^1.0.1:
+  version "1.0.1"
+  resolved "http://npm-registry.qunhequnhe.com/plugin-error/-/plugin-error-1.0.1.tgz#77016bd8919d0ac377fdcdd0322328953ca5781c"
+  integrity sha512-L1zP0dk7vGweZME2i+EeakvUNqSrdiI3F91TwEoYiGrAfUXmVv6fJIq4g82PAXxNsWOp0J7ZqQy/3Szz0ajTxA==
+  dependencies:
+    ansi-colors "^1.0.1"
+    arr-diff "^4.0.0"
+    arr-union "^3.1.0"
+    extend-shallow "^3.0.2"
 
 posix-character-classes@^0.1.0:
   version "0.1.1"
@@ -6300,7 +6320,7 @@ source-map@^0.4.2:
   dependencies:
     amdefine ">=0.0.4"
 
-source-map@^0.5.0, source-map@^0.5.6, source-map@~0.5.0:
+source-map@^0.5.0, source-map@^0.5.1, source-map@^0.5.6, source-map@~0.5.0:
   version "0.5.7"
   resolved "https://registry.npmmirror.com/source-map/-/source-map-0.5.7.tgz#8a039d2d1021d22d1ea14c80d8ea468ba2ef3fcc"
   integrity sha512-LbrmJOMUSdEVxIKvdcJzQC+nQhe8FUZQTXQy6+I75skNgn3OoQ0DZA8YnFa7gp8tqtL3KPf1kmo0R5DoApeSGQ==
@@ -6900,6 +6920,13 @@ vinyl-sourcemap@^1.1.0:
     now-and-later "^2.0.0"
     remove-bom-buffer "^3.0.0"
     vinyl "^2.0.0"
+
+vinyl-sourcemaps-apply@^0.2.0:
+  version "0.2.1"
+  resolved "http://npm-registry.qunhequnhe.com/vinyl-sourcemaps-apply/-/vinyl-sourcemaps-apply-0.2.1.tgz#ab6549d61d172c2b1b87be5c508d239c8ef87705"
+  integrity sha512-+oDh3KYZBoZC8hfocrbrxbLUeaYtQK7J5WU5Br9VqWqmCll3tFJqKp97GC9GmMsVIL0qnx2DgEDVxdo5EZ5sSw==
+  dependencies:
+    source-map "^0.5.1"
 
 vinyl@^0.5.0:
   version "0.5.3"

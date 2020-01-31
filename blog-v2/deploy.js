@@ -38,7 +38,6 @@ module.exports = function getDeployer({
 
             console.log(chalk.green('- 生成静态网站...'));
             run('npm run generate');
-            fse.removeSync(deployDir);
             fse.moveSync(path.resolve(__dirname, 'public'), deployDir);
         },
 

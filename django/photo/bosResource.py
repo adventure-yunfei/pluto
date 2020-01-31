@@ -5,7 +5,8 @@
 # 	* 所有路径为相对于根目录的路径，以'/'开头和分割
 #	* 路径以'/'结尾为文件夹，否则为文件
 #	* 路径(无论输入或输出)字符串均以utf-8编码
-
+import json
+import os.path as path
 from baidubce.bce_client_configuration import BceClientConfiguration
 from baidubce.auth.bce_credentials import BceCredentials
 # from baidubce import exception
@@ -14,13 +15,13 @@ from baidubce.auth.bce_credentials import BceCredentials
 from baidubce.services.bos.bos_client import BosClient
 from django.utils import http
 import exceptions as E, helper as H
-from photo import globalConfig
+from photo.globalConfig import deployConfig
 
 # 配置BOS变量及BOS Client
 _bucket = 'adventure030-image'
 _bos_host = "http://bj.baidubos.com/"
-_access_key = globalConfig.config['django-photosite']['baidu-access-key']
-_secret_access_key = globalConfig.config['django-photosite']['baidu-secret-key']
+_access_key = deployConfig['baidu-access-key']
+_secret_access_key = deployConfig['baidu-secret-key']
 
 H.ensure(_access_key != '' and _secret_access_key != '', E.AssertFailed, '百度 Access Key 未提供.')
 

@@ -2,5 +2,12 @@
   "hexoblog": {
     "leancloud-app-id": "",
     "leancloud-app-key": ""
+  },
+  "django-photosite": {
+    "mysql-user": "",
+    "mysql-passwd": "",
+    "baidu-access-key": "",
+    "baidu-secret-key": "",
+    "baiduAnalytics": ""
   }
 }

@@ -4,9 +4,16 @@ const chalk = require('chalk');
 const slash = require('slash');
 const fse = require('fs-extra');
 const _ = require('lodash');
+const utils = require('../deployUtils');
 
 module.exports = function getDeployer({
     port,
+
+    mysql_user,
+    mysql_passwd,
+    baidu_access_key,
+    baidu_secret_key,
+    baiduAnalytics,
 }) {
     const uwsgi_ini_file = path.resolve(__dirname, 'djproj-uwsgi.ini');
     const uwsgi_pid_file = path.resolve(__dirname, 'djproj-uwsgi.pid');
@@ -22,6 +29,18 @@ module.exports = function getDeployer({
         name: 'Django',
 
         postdeploy() {
+            console.log(chalk.green('- 注入 Django 运行时配置...'));
+            utils.updateJsonFile(
+                path.resolve(__dirname, './deploy.config.json'),
+                {
+                    'mysql-user': mysql_user,
+                    'mysql-passwd': mysql_passwd,
+                    'baidu-access-key': baidu_access_key,
+                    'baidu-secret-key': baidu_secret_key,
+                    'baiduAnalytics': baiduAnalytics,
+                }
+            );
+
             console.log(chalk.green('- 生成 Django uWSGI 配置...'));
             const uWSGITemplate = fse.readFileSync(path.resolve(__dirname, './django-uwsgi.tpl.ini'), 'utf8');
             fse.outputFileSync(

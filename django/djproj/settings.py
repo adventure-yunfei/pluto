@@ -1,5 +1,6 @@
 # Django settings for djproj project.
 from os import path
+import json
 
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
@@ -16,12 +17,16 @@ if DEBUG:
     import mimetypes
     mimetypes.add_type("image/png", ".png", True)
 
+_deployConfigFile = open(path.abspath(path.join(path.dirname(__file__), '..', 'deploy.config.json')), 'r')
+deployConfig = json.load(_deployConfigFile)
+_deployConfigFile.close()
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'django',                      # Or path to database file if using sqlite3.
-        'USER': 'root',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
+        'USER': deployConfig['mysql-user'],                      # Not used with sqlite3.
+        'PASSWORD': deployConfig['mysql-passwd'],                  # Not used with sqlite3.
         'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }

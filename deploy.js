@@ -130,6 +130,11 @@ const getDeployer = () => {
 
         require('./django/deploy')({
             port: djangoPort,
+            mysql_user: ensureGetConfig('django-photosite.mysql-user'),
+            mysql_passwd: ensureGetConfig('django-photosite.mysql-passwd'),
+            baidu_access_key: ensureGetConfig('django-photosite.baidu-access-key'),
+            baidu_secret_key: ensureGetConfig('django-photosite.baidu-secret-key'),
+            baiduAnalytics: ensureGetConfig('django-photosite.baiduAnalytics'),
         }),
 
         require('./react/deploy')({
@@ -137,7 +142,7 @@ const getDeployer = () => {
                 'photo.yunfei.me',
                 'game2048.yunfei.me',
             ],
-            port: 12901,
+            port: 12191,
             deployRootDir,
             djangoApiServerPort: djangoPort,
         }),

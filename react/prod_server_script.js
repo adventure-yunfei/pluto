@@ -1,7 +1,7 @@
 const process = require('process');
 const pm2 = require('pm2');
 
-const ServerScript = 'app/server/index.js';
+const ServerScript = 'server-build/server/index.js';
 const ServerPM2Name = 'pluto';
 
 function start_server(done) {

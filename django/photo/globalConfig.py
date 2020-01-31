@@ -2,8 +2,12 @@ import json
 
 import os.path as path
 
-globalConfigJsonFile = open(path.abspath(path.join(path.dirname(__file__), '..', '..', 'config.json')), 'r')
+def _readJsonFile (filepath):
+    jsonFile = open(filepath, 'r')
+    content = json.load(jsonFile)
+    jsonFile.close()
+    return content
 
-config = json.load(globalConfigJsonFile)
+config = _readJsonFile(path.abspath(path.join(path.dirname(__file__), '..', '..', 'config.json')))
 
-globalConfigJsonFile.close()
+deployConfig = _readJsonFile(path.abspath(path.join(path.dirname(__file__), '..', 'deploy.config.json')))

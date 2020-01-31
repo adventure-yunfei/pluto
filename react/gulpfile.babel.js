@@ -1,4 +1,7 @@
+import path from 'path';
 import gulp from 'gulp';
+import merge from 'merge-stream';
+import babel from 'gulp-babel';
 import gulpUtil from 'gulp-util';
 import bg from 'gulp-bg';
 import webpack from 'webpack';
@@ -6,7 +9,6 @@ import yargs from 'yargs';
 import rimraf from 'rimraf';
 import eslint from 'gulp-eslint';
 import runSequence from 'run-sequence';
-import pm2 from 'pm2';
 import {dependencySizeTree, printDependencySizeTree} from 'webpack-bundle-size-analyzer';
 import taskList from 'gulp-task-listing';
 
@@ -82,42 +84,26 @@ gulp.task('build', ['clean'], (done) => {
     });
 });
 
-const ServerScript = 'app/server/index.js';
-const ServerPM2Name = 'pluto';
+gulp.task('build-server', function () {
+    rimraf.sync(path.resolve(__dirname, 'server-build'));
+    return merge([
+        gulp.src('./app/**/*.js', {base: './app'})
+            .pipe(babel())
+            .pipe(gulp.dest('server-build')),
+        gulp.src(['./app/**/*', '!./app/**/*.js'], {base: './app'})
+            .pipe(gulp.dest('server-build'))
+    ]);
+});
+
 gulp.task('server', ['env'], function (done) {
     if (isDev) {
         bg('node', 'app/server/index.js')();
     } else {
-        pm2.connect(err => {
-            if (err) {
-                gulpUtil.log('[pm2]', 'start pm2 failed:');
-                gulpUtil.log('[pm2]', err);
-                done();
-            } else {
-                pm2.start({
-                    script: ServerScript,
-                    name: ServerPM2Name
-                }, () => {
-                    pm2.disconnect();
-                    done();
-                });
-            }
-        });
+        require('./prod_server_script').start_server(done);
     }
 });
 gulp.task('stop-server', done => {
-    pm2.connect(err => {
-        if (err) {
-            gulpUtil.log('[pm2]', 'start pm2 failed:');
-            gulpUtil.log('[pm2]', err);
-            done();
-        } else {
-            pm2.stop(ServerPM2Name, () => {
-                pm2.disconnect();
-                done();
-            });
-        }
-    });
+    require('./prod_server_script').stop_server(done);
 });
 
 gulp.task('help', taskList.withFilters(/None/, /env/));

@@ -26,7 +26,6 @@ module.exports = function getDeployer({
 
             console.log(chalk.green('- 编译文件...'));
             run('npm run gulp');
-            fse.removeSync(deployDir);
             fse.moveSync(path.resolve(__dirname, 'dist'), path.resolve(deployDir, 'dist'));
         },
 

@@ -6,7 +6,7 @@
   },
   "dependencies": {
     "javascript-class": "^1.0.2",
-    "jquery": "^2.2.2",
+    "jquery": "^3.5.0",
     "materialize-css": "^0.97.5"
   },
   "devDependencies": {

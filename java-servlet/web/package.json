@@ -8,7 +8,7 @@
     "build": "gulp all"
   },
   "dependencies": {
-    "jquery": "^2.1.4",
+    "jquery": "^3.5.0",
     "jquery-ui": "^1.10.5",
     "lodash": "^3.10.0",
     "react": "^0.13.3"

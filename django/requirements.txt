@@ -1,4 +1,4 @@
-Django==1.8.4
+Django==1.11.29
 MySQL-python==1.2.5
 pillow==2.9
 baidubce==0.8.3

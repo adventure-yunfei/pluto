@@ -1,5 +1,5 @@
 Django==1.8.4
 MySQL-python==1.2.5
-pillow==2.9
+pillow==9.0.1
 baidubce==0.8.3
 uwsgi==2.0.12

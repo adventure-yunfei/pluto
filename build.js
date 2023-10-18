@@ -1,4 +1,4 @@
-var child_process = require('child_process'),
+var pm2 = require('pm2'),
     fs = require('fs-extra'),
     path = require('path'),
     commander = require('commander'),
@@ -15,8 +15,48 @@ handlebars.registerHelper('equal', function (a, b, options) {
     }
 });
 
+function startPm2Server(serverName, serverScript) {
+    return new Promise((resolve, reject) => {
+        pm2.connect(err => {
+            if (err) {
+                gulpUtil.log('[pm2]', 'start pm2 failed:');
+                gulpUtil.log('[pm2]', err);
+                reject(err);
+            } else {
+                pm2.start({
+                    name: serverName,
+                    script: serverScript,
+                }, (error, proc) => {
+                    pm2.disconnect();
+                    if (error) {
+                        reject(error)
+                    } else {
+                        resolve();
+                    }
+                });
+            }
+        });
+    });
+}
+
+function stopPm2Server(serverName) {
+    return new Promise((resolve, reject) => {
+        pm2.connect(err => {
+            if (err) {
+                gulpUtil.log('[pm2]', 'start pm2 failed:');
+                gulpUtil.log('[pm2]', err);
+                reject(err);
+            } else {
+                pm2.stop(serverName, () => {
+                    pm2.disconnect();
+                    resolve();
+                });
+            }
+        });
+    });
+}
+
 var PROJ_ROOT = __dirname,
-    CWD = process.cwd(),
     uwsgi_ini_file = path.resolve(PROJ_ROOT, 'django/djproj-uwsgi.ini'),
     uwsgi_pid_file = path.resolve(PROJ_ROOT, 'django/djproj-uwsgi.pid'),
     RUNTIME_DIR = path.resolve(PROJ_ROOT, '.runtime'),
@@ -25,9 +65,6 @@ var PROJ_ROOT = __dirname,
     NGINX_LOG_DIR = path.resolve(LOGS_DIR, 'nginx');
 
 function log(msg) { console.log(msg); }
-function logCmd(cmd) {
-    console.log('# CMD # : ' + cmd);
-}
 function execAsync(cmd, args, options) {
     return nodeExecCmd([cmd].concat(args || []).join(' '), {
         logCmd: !!options && !!options.showCmdLog,
@@ -219,6 +256,15 @@ commander
         return Promise.resolve()
             .then(checkConfigFile)
             .then(function () {
+                log('# 编译 Demo 工程...');
+                chdir(path.resolve(PROJ_ROOT, 'demo'));
+                return Promise.resolve()
+                    .then(() => {
+                        log('  - 安装npm包...');
+                        return execAsync('yarn');
+                    });
+            })
+            .then(function () {
                 log('# 编译 Hexo Blog 工程...');
                 chdir(path.resolve(PROJ_ROOT, 'blog-v2'));
                 return Promise.resolve()
@@ -305,6 +351,10 @@ commander
                         return execAsync('service', ['nginx', 'start']);
                     })
                     .then(function () {
+                        log('  - 启动 pm2 - demo 服务器...');
+                        return startPm2Server('demo', path.resolve(PROJ_ROOT, 'demo/server.js'));
+                    })
+                    .then(function () {
                         log('  - 启动 pm2 - react 服务器...');
                         chdir(PROJ_ROOT + '/react');
                         return execAsync('yarn', ['gulp', 'server', '-p']);
@@ -345,7 +395,7 @@ commander
                 return execAsync('service', ['nginx', 'stop']);
             })
             .then(function () {
-                log('  - 停止 pm2 (react, meteor killers game) 服务器进程...');
+                log('  - 停止 pm2 (demo, react, meteor killers game) 服务器进程...');
                 return execAsync(PROJ_ROOT + '/node_modules/.bin/pm2', ['kill']);
             })
             //.then(function () {

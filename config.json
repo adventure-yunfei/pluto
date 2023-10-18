@@ -33,6 +33,10 @@
     "github-hooks": {
       "by_port": 12196,
       "by_domain": "github-hooks.yunfei.me"
+    },
+    "demo": {
+      "by_port": 12197,
+      "by_domain": "demo.yunfei.me"
     }
   },
 

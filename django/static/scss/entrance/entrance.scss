@@ -11,7 +11,7 @@ body {
   width: $gap;
   height: $gap;
   margin-top: $top-padding;
-  margin-left: - $gap / 2;
+  margin-left: calc(-1 * $gap / 2);
 
   .item {
     position: absolute;
@@ -61,7 +61,7 @@ body {
 
 @mixin fit-to-screen-size($screen-size) {
   @media all and (min-width: $screen-size) and (min-height: $screen-size) {
-    $size: ($screen-size - $gap - $top-padding) / 2;
+    $size: calc(($screen-size - $gap - $top-padding) / 2);
     .container {
       top: $size;
       .item {

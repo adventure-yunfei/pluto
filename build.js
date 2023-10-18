@@ -143,7 +143,7 @@ commander
                 chdir(PROJ_ROOT + '/meteor-killers-game');
                 return Promise.resolve().then(function () {
                     log('  - 安装npm包...');
-                    return execAsync('npm', ['install']);
+                    return execAsync('yarn');
                 }).then(function () {
                     log('  - 编译meteor压缩包...');
                     return execAsync('meteor', ['build', RELEASE_DIR + '/meteor-killers-game', '--architecture', 'os.linux.x86_64']);
@@ -166,7 +166,7 @@ commander
                 }).then(function () {
                     log('  - 安装meteor服务端依赖的npm包...');
                     chdir('bundle/programs/server');
-                    return execAsync('npm', ['install', '--no-shrinkwrap']);
+                    return execAsync('yarn');
                 }).then(function () {
                     log('  - 准备pm2启动配置文件...');
                     chdir('../..');
@@ -199,7 +199,7 @@ function buildBlogProject() {
         })
         .then(() => {
             log('  - 生成静态网站...');
-            return execAsync('npm', ['run', 'generate']);
+            return execAsync('yarn', ['generate']);
         });
 }
 
@@ -228,7 +228,7 @@ commander
                     })
                     .then(() => {
                         log('  - 生成静态网站...');
-                        return execAsync('npm', ['run', 'generate']);
+                        return execAsync('yarn', ['generate']);
                     });
             })
             .then(function () {
@@ -236,10 +236,10 @@ commander
                 chdir(PROJ_ROOT + '/static');
                 return Promise.resolve().then(function () {
                     log('  - 安装npm包...');
-                    return execAsync('npm', ['install']);
+                    return execAsync('yarn');
                 }).then(function () {
                     log('  - 编译文件...');
-                    return execAsync('npm', ['run', 'gulp']);
+                    return execAsync('yarn', ['gulp']);
                 });
             })
             .then(function () {
@@ -253,11 +253,11 @@ commander
                 return Promise.resolve()
                     .then(function () {
                         log('  - 安装npm包...');
-                        return execAsync('npm', ['install'])
+                        return execAsync('yarn')
                     })
                     .then(function () {
                         log('  - 编译文件...');
-                        return execAsync('npm', ['run', 'gulp', '---', 'build', '-p']);
+                        return execAsync('yarn', ['gulp', 'build', '-p']);
                     });
             })
             .then(function () {
@@ -265,10 +265,10 @@ commander
                 chdir(PROJ_ROOT + '/typescript-entrance');
                 return Promise.resolve().then(function () {
                     log('  - 安装npm包...');
-                    return execAsync('npm', ['install']);
+                    return execAsync('yarn');
                 }).then(function () {
                     log('  - 编译文件...');
-                    return execAsync('npm', ['run', 'build']);
+                    return execAsync('yarn', ['build']);
                 });
             })
             .then(function () {
@@ -307,7 +307,7 @@ commander
                     .then(function () {
                         log('  - 启动 pm2 - react 服务器...');
                         chdir(PROJ_ROOT + '/react');
-                        return execAsync('npm', ['run', 'gulp', '--', 'server', '-p']);
+                        return execAsync('yarn', ['gulp', 'server', '-p']);
                     })
                     .then(function () {
                         log('  - 启动 pm2 - meteor killers game 服务器...');
@@ -317,7 +317,7 @@ commander
                     .then(() => {
                         log('  - 启动 pm2 - Github Hooks 服务器...');
                         chdir(PROJ_ROOT);
-                        return execAsync('npm', ['run', 'pm2', '--', 'start', 'github-hooks/server.js', '--name', 'github-hooks']);
+                        return execAsync('yarn', ['pm2', 'start', 'github-hooks/server.js', '--name', 'github-hooks']);
                     })
                     .then(function () {
                         log('  - 启动 django uwsgi...');
@@ -351,7 +351,7 @@ commander
             //.then(function () {
             //    log('  - 停止 react 服务器...');
             //    chdir(PROJ_ROOT + '/react');
-            //    return execAsync('npm', ['run', 'gulp', '--', 'stop-server']);
+            //    return execAsync('yarn', ['gulp', 'stop-server']);
             //})
             .then(function () {
                 log('  - 停止 django uwsgi...');

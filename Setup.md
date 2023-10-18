@@ -13,7 +13,7 @@
 - Node 4+
 - npm 2~3
 - yarn@1.x
-- meteor
+- meteor 2
 - 如有必要, [配置 npm registry 镜像](https://github.com/adventure-yunfei/easy-git-npm-tools.git)
 
 最后, 在工程根目录下安装npm包: `yarn`, 以启用必要的编译脚本执行环境。

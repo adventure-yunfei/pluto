@@ -39,23 +39,6 @@ function startPm2Server(serverName, serverScript) {
     });
 }
 
-function stopPm2Server(serverName) {
-    return new Promise((resolve, reject) => {
-        pm2.connect(err => {
-            if (err) {
-                gulpUtil.log('[pm2]', 'start pm2 failed:');
-                gulpUtil.log('[pm2]', err);
-                reject(err);
-            } else {
-                pm2.stop(serverName, () => {
-                    pm2.disconnect();
-                    resolve();
-                });
-            }
-        });
-    });
-}
-
 var PROJ_ROOT = __dirname,
     uwsgi_ini_file = path.resolve(PROJ_ROOT, 'django/djproj-uwsgi.ini'),
     uwsgi_pid_file = path.resolve(PROJ_ROOT, 'django/djproj-uwsgi.pid'),

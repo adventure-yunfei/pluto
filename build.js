@@ -59,13 +59,13 @@ function prepareRuntimeDir() {
         Promise.resolve().then(() => {
             logsDirs.forEach(logDir => {
                 fs.ensureDirSync(logDir);
-                fs.chmodSync(logDir, 0755); // logstash读取日志文件需要文件的read权限, 以及文件夹的exec权限
+                fs.chmodSync(logDir, 0o755); // logstash读取日志文件需要文件的read权限, 以及文件夹的exec权限
             });
         }),
 
         Promise.resolve().then(() => {
             fs.ensureDirSync(LOGSTASH_SINCEDB_DIR);
-            fs.chmodSync(LOGSTASH_SINCEDB_DIR, 0777);
+            fs.chmodSync(LOGSTASH_SINCEDB_DIR, 0o777);
         })
     ]);
 }

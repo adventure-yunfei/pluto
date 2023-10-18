@@ -1,4 +1,4 @@
-$sin-60: 1.7320508075688772 / 2;
+$sin-60: calc(1.7320508075688772 / 2);
 $cos-60: 0.5;
 @mixin line-triangle($color, $line-length, $line-width) {
   $width: $line-length;
@@ -13,16 +13,16 @@ $cos-60: 0.5;
     background-color: $color;
   }
   .line-1 {
-    transform: translate(-$width / 4, $height / 2) rotate(-60deg);
-    border-radius: 0 #{$line-width/2} 0 #{$line-width/2}; // border-radius 消除边的两段的不自然连接
+    transform: translate(calc(-1 * $width / 4), calc($height / 2)) rotate(-60deg);
+    border-radius: 0 #{calc($line-width/2)} 0 #{calc($line-width/2)}; // border-radius 消除边的两段的不自然连接
   }
   .line-2 {
-    transform: translate($width / 4, $height / 2) rotate(60deg);
-    border-radius: #{$line-width/2} 0 #{$line-width/2} 0;
+    transform: translate(calc($width / 4), calc($height / 2)) rotate(60deg);
+    border-radius: #{calc($line-width/2)} 0 #{calc($line-width/2)} 0;
   }
   .line-3 {
-    transform: translate(0, $height - $line-width / 2);
-    border-radius: 0 0 #{$line-width/2} #{$line-width/2};
+    transform: translate(0, calc($height - $line-width / 2));
+    border-radius: 0 0 #{calc($line-width/2)} #{calc($line-width/2)};
   }
 }
 
@@ -31,7 +31,7 @@ $cos-60: 0.5;
   $width: 50px;
   $height: $width * $sin-60;
   $line-width: 2px;
-  $inner-width: $width / 2 - $line-width;
+  $inner-width: calc($width / 2 - $line-width);
   $inner-height: $inner-width * $sin-60;
   position: absolute;
 
@@ -49,7 +49,7 @@ $cos-60: 0.5;
 
   @mixin inner-triangle-common {
     height: 27.5px;
-    left: ($width - $inner-width) / 2;
+    left: calc(($width - $inner-width) / 2);
     top: 16px;
     transform: rotate(180deg);
   }

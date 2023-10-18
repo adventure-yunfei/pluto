@@ -2,7 +2,7 @@ import express from 'express';
 import request from 'request';
 import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
-import webapckHotMiddleware from 'webpack-hot-middleware';
+// import webapckHotMiddleware from 'webpack-hot-middleware';
 import compression from 'compression';
 
 import '../lib/polyfill';
@@ -46,11 +46,11 @@ if (__DEV__) {
     const webpackConfig = makeWebpackConfig(true, true);
     const compiler = webpack(webpackConfig);
     app.use(webpackDevMiddleware(compiler, {
-        noInfo: true,
+        // noInfo: true,
         publicPath: webpackConfig.output.publicPath
     }));
 
-    app.use(webapckHotMiddleware(compiler));
+    // app.use(webapckHotMiddleware(compiler));
 }
 
 app.use('/api', createProxy(config.apiServer, {nocache: true}));

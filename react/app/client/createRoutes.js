@@ -1,6 +1,5 @@
 import React from 'react';
-import {Route, IndexRoute, IndexRedirect} from 'react-router';
-import urlEncoder from 'urlencoder';
+import {Route, IndexRoute} from 'react-router';
 
 import Root from './components/Root';
 
@@ -23,7 +22,7 @@ export default function createRoutes(getState) {
         if (!isLoggedIn) {
             const {location} = nextState;
             const originURL = location.pathname + location.search;
-            return replaceState(`/login?originURL=${urlEncoder.encode(originURL)}`);
+            return replaceState(`/login?originURL=${encodeURIComponent(originURL)}`);
         }
     };
 

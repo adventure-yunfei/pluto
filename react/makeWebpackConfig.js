@@ -1,44 +1,24 @@
 /*eslint-env node */
 import path from 'path';
 import webpack from 'webpack';
-import ExtractTextPlugin from 'extract-text-webpack-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import {ROOT, APP_SRC_DIR, BUILD_DIR} from './constants';
-import autoprefixer from 'autoprefixer';
-
-const BABEL_POLYFILL = require.resolve('babel-core/polyfill');
 
 export default function makeWebpackConfig(isDev, isTest = false) {
-    const getStyleLoader = (preCssLoader = '') => {
-        preCssLoader = preCssLoader && `!${preCssLoader}`;
-        return isDev ? `style-loader!css-loader!${preCssLoader}`
-            : ExtractTextPlugin.extract('style-loader', `css-loader!${preCssLoader}`);
+    const getStyleLoaders = (preCssLoader = undefined) => {
+        return [
+            isDev ? 'style-loader': MiniCssExtractPlugin.loader,
+            'css-loader',
+            ...(preCssLoader ? [preCssLoader] : []),
+        ];
     };
-    const styleLoaders = [{
-        // postcss 添加前缀功能忽略外部库样式文件
-        exclude: [/node_modules|plugins/],
-        test: /\.css$/,
-        loader: getStyleLoader('postcss-loader')
-    }, {
-        include: [/node_modules|plugins/],
-        test: [/\.css/],
-        loader: getStyleLoader('')
-    }, {
-        test: /\.s(a|c)ss$/,
-        loader: getStyleLoader('postcss-loader!sass-loader')
-    }];
 
     return {
         context: ROOT,
         entry: {
-            main: [
-                ...(isDev ? ['webpack-hot-middleware/client'] : []),
-                BABEL_POLYFILL,
-                path.join(APP_SRC_DIR, 'client', 'main.js')
-            ]
+            main: path.join(APP_SRC_DIR, 'client', 'main.js'),
         },
-        debug: isDev,
-        devtool: isDev ? 'cheap-module-source-map' : '',
-        watch: isDev,
+        mode: isDev ? 'development' : 'production',
         output: {
             path: BUILD_DIR,
             filename: '[name].js',
@@ -46,35 +26,26 @@ export default function makeWebpackConfig(isDev, isTest = false) {
             publicPath: '/build/'
         },
         module: {
-            loaders: [{
+            rules: [{
                 exclude: [/node_modules/],
                 test: /\.js$/,
-                loader: 'babel',
-                //loaders: ['babel', `js-assert/webpack-assert-loader?dev=${isDev ? 'true' : 'false'}`] // TODO: add js-assert loader
-                query: isDev ? {
-                    plugins: [
-                        'react-transform'
-                    ],
-                    extra: {
-                        'react-transform': {
-                            'transforms': [{
-                                transform: 'react-transform-hmr',
-                                imports: ['react'],
-                                locals: ['module']
-                            }]
-                        }
-                    }
-                } : {}
-            }, {
-                test: /\.json/,
-                loader: 'json-loader'
+                use: "babel-loader",
             }, {
                 test: /\.(gif|jpg|png|woff|woff2|eot|ttf|svg)(\?v=.+)?$/,
-                loader: 'url?limit=10000&name=[path][name].[ext]?[sha256:hash:base64:8]' // embed img data if less than 10kb
-            }, ...styleLoaders]
-        },
-        postcss: function () {
-            return [autoprefixer];
+                use: {
+                    loader: 'url-loader',
+                    options: {
+                        limit: 10000,
+                    },
+                }
+            }, {
+                include: [/node_modules|plugins/],
+                test: [/\.css/],
+                use: getStyleLoaders(undefined)
+            }, {
+                test: /\.s(a|c)ss$/,
+                use: getStyleLoaders('sass-loader')
+            }]
         },
         plugins: [
             // Define a "__DEV__" variable to add code only for debug mode
@@ -86,21 +57,6 @@ export default function makeWebpackConfig(isDev, isTest = false) {
             new webpack.DefinePlugin({
                 'process.env.NODE_ENV': isDev ? '"development"' : '"production"'
             })
-        ].concat(isDev ? [
-            new webpack.optimize.OccurenceOrderPlugin(),
-            new webpack.HotModuleReplacementPlugin(),
-            new webpack.NoErrorsPlugin()
-        ] : [
-            new ExtractTextPlugin('[name].css'),
-            new webpack.optimize.DedupePlugin(),
-            new webpack.optimize.OccurenceOrderPlugin(),
-            new webpack.optimize.UglifyJsPlugin({
-                compress: {
-                    warnings: false,
-                    /* eslint camelcase: 0*/
-                    screw_ie8: true
-                }
-            })
-        ])
+        ].concat(isDev ? [] : [new MiniCssExtractPlugin({ filename: "[name].css" })]),
     };
 }

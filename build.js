@@ -276,19 +276,6 @@ commander
                 return execAsync('python', ['build.py']);
             })
             .then(function () {
-                log('# 编译 React 工程...');
-                chdir(PROJ_ROOT + '/react');
-                return Promise.resolve()
-                    .then(function () {
-                        log('  - 安装npm包...');
-                        return execAsync('yarn')
-                    })
-                    .then(function () {
-                        log('  - 编译文件...');
-                        return execAsync('yarn', ['gulp', 'build', '-p']);
-                    });
-            })
-            .then(function () {
                 log('# 编译 typescript-entrance 工程...');
                 chdir(PROJ_ROOT + '/typescript-entrance');
                 return Promise.resolve().then(function () {

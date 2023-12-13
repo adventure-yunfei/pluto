@@ -196,6 +196,7 @@ commander
                 chdir(RELEASE_DIR + '/meteor-killers-game');
                 return Promise.resolve().then(function () {
                     log('  - 解压meteor压缩包...');
+                    fs.removeSync('bundle');
                     return execAsync('tar', ['-xf', 'meteor-killers-game.tar.gz']);
                 }).then(function () {
                     log('  - 安装meteor服务端依赖的npm包...');

@@ -55,6 +55,7 @@ function execAsync(cmd, args, options) {
         bg: !!options && !!options.runOnBackground
     });
 }
+
 function renderTemplateFile(filepath, outputPath, context) {
     return Promise.resolve().then(function () {
         var fileContent = fs.readFileSync(filepath, 'utf8');
@@ -168,6 +169,19 @@ commander
                     log('  - 编译meteor压缩包...');
                     return execAsync('meteor', ['build', RELEASE_DIR + '/meteor-killers-game', '--architecture', 'os.linux.x86_64']);
                 });
+            })
+            .then(() => {
+                log('# 编译 React 发布包...');
+                chdir(PROJ_ROOT + '/react');
+                return Promise.resolve().then(function () {
+                    log('  - 安装npm包...');
+                    return execAsync('yarn');
+                }).then(function () {
+                    log('  - 编译 react client...');
+                    return execAsync('yarn', ['gulp', 'build', '-p']).then(() => {
+                        return fs.copy(path.resolve(PROJ_ROOT, 'react/build'), path.resolve(RELEASE_DIR, 'react/client'));
+                    });
+                });
             });
     });
 
@@ -204,6 +218,13 @@ commander
                         }]
                     });
                 });
+            })
+
+            .then(() => {
+                log('# 处理 React 发布包...');
+                const reactClientBuildDir = path.resolve(PROJ_ROOT, 'react/build');
+                fs.emptyDirSync(reactClientBuildDir);
+                fs.copySync(path.resolve(RELEASE_DIR, 'react/client'), reactClientBuildDir);
             })
 
             .catch(onMainCommandFailure);

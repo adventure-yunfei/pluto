@@ -52,6 +52,7 @@
     "leancloud-app-key": ""
   },
   "django-photosite": {
+    "mysql_password": "",
     "baidu-access-key": "",
     "baidu-secret-key": "",
     "baiduAnalytics": ""

@@ -92,8 +92,5 @@ server {
                 run(`uwsgi --stop  ${uwsgi_pid_file}`);
             } catch (e) {}
         },
-
-        // premigrate?: func;
-        // postmigrate?: func;
     };
 };

@@ -79,13 +79,13 @@ gulp.task('build-server', function () {
     ]);
 });
 
-gulp.task('server', ['env'], function (done) {
+gulp.task('server', gulp.series(['env'], function (done) {
     if (isDev) {
         bg('node', 'app/server/index.js')();
     } else {
         require('./prod_server_script').start_server(done);
     }
-});
+}));
 gulp.task('stop-server', done => {
     require('./prod_server_script').stop_server(done);
 });

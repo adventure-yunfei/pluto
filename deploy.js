@@ -14,9 +14,6 @@ deployer: {
 
     startServer?: func;
     stopServer?: func;
-
-    premigrate?: func;
-    postmigrate?: func;
 };
 */
 
@@ -105,7 +102,7 @@ const _getDeployer = (deployers) => ({
 });
 
 const getDeployer = () => {
-    const djangoPort = 12190;
+    const config = require('./config.json');
     const deployConfig = require('./deploy.config.json');
     const ensureGetConfig = (configPath) => {
         const val = _.get(deployConfig, configPath);
@@ -117,19 +114,19 @@ const getDeployer = () => {
 
     return _getDeployer([
         require('./blog-v2/deploy')({
-            domain: 'blog.yunfei.me',
+            domain: config.hosts.hexoblog.by_domain,
             deployRootDir,
             leancloud_app_id: ensureGetConfig('hexoblog.leancloud-app-id'),
             leancloud_app_key: ensureGetConfig('hexoblog.leancloud-app-key'),
         }),
 
         require('./static/deploy')({
-            domain: 'static.yunfei.me',
+            domain: config.hosts.static.by_domain,
             deployRootDir,
         }),
 
         require('./django/deploy')({
-            port: djangoPort,
+            port: config.hosts.django.by_port,
             mysql_user: ensureGetConfig('django-photosite.mysql-user'),
             mysql_passwd: ensureGetConfig('django-photosite.mysql-passwd'),
             baidu_access_key: ensureGetConfig('django-photosite.baidu-access-key'),
@@ -142,9 +139,9 @@ const getDeployer = () => {
                 'photo.yunfei.me',
                 'game2048.yunfei.me',
             ],
-            port: 12191,
+            port: config.hosts.react.by_port,
             deployRootDir,
-            djangoApiServerPort: djangoPort,
+            djangoApiServerPort: config.hosts.django.by_port,
         }),
     ]);
 }

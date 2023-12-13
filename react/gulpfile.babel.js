@@ -1,6 +1,7 @@
 import gulp from 'gulp';
 import gulpUtil from 'gulp-util';
 import bg from 'gulp-bg';
+import babel from 'gulp-babel';
 import webpack from 'webpack';
 import yargs from 'yargs';
 import rimraf from 'rimraf';
@@ -8,7 +9,7 @@ import pm2 from 'pm2';
 import taskList from 'gulp-task-listing';
 
 import makeWebpackConfig from './makeWebpackConfig';
-import {BUILD_DIR} from './constants';
+import {BUILD_DIR, BUILD_SERVER_DIR} from './constants';
 
 const args = yargs
     .alias('p', 'production')
@@ -30,6 +31,14 @@ gulp.task('clean', (done) => {
     rimraf.sync(`${BUILD_DIR}/*`);
     done();
 });
+
+gulp.task('build-server', () => {
+    rimraf.sync(`${BUILD_SERVER_DIR}/*`);
+    return gulp.src(['./app/server/**/*.js', './app/lib/**/*.js', '!node_modules/**'], { base: '.' })
+        .pipe(babel())
+        .pipe(gulp.dest(BUILD_SERVER_DIR));
+});
+
 gulp.task('build', gulp.series(['clean'], (done) => {
     webpack(makeWebpackConfig(isDev, isTest), (err, stats) => {
         var jsonStats = stats.toJson();
@@ -66,28 +75,28 @@ gulp.task('build', gulp.series(['clean'], (done) => {
     });
 }));
 
-const ServerScript = 'app/server/index.js';
+const ServerScript = 'build-server/app/server/index.js';
 const ServerPM2Name = 'pluto';
 gulp.task('server', gulp.series(['env'], function (done) {
-    if (isDev) {
-        bg('node', 'app/server/index.js')();
-    } else {
-        pm2.connect(err => {
-            if (err) {
-                gulpUtil.log('[pm2]', 'start pm2 failed:');
-                gulpUtil.log('[pm2]', err);
+    // if (isDev) {
+    //     bg('node', 'app/server/index.js')();
+    // } else {
+    pm2.connect(err => {
+        if (err) {
+            gulpUtil.log('[pm2]', 'start pm2 failed:');
+            gulpUtil.log('[pm2]', err);
+            done();
+        } else {
+            pm2.start({
+                script: ServerScript,
+                name: ServerPM2Name
+            }, () => {
+                pm2.disconnect();
                 done();
-            } else {
-                pm2.start({
-                    script: ServerScript,
-                    name: ServerPM2Name
-                }, () => {
-                    pm2.disconnect();
-                    done();
-                });
-            }
-        });
-    }
+            });
+        }
+    });
+    // }
 }));
 gulp.task('stop-server', done => {
     pm2.connect(err => {

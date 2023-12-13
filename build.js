@@ -181,6 +181,11 @@ commander
                     return execAsync('yarn', ['gulp', 'build', '-p']).then(() => {
                         return fs.copy(path.resolve(PROJ_ROOT, 'react/build'), path.resolve(RELEASE_DIR, 'react/client'));
                     });
+                }).then(function () {
+                    log('  - 编译 react server...');
+                    return execAsync('yarn', ['gulp', 'build-server']).then(() => {
+                        return fs.copy(path.resolve(PROJ_ROOT, 'react/build-server'), path.resolve(RELEASE_DIR, 'react/server'));
+                    });
                 });
             });
     });
@@ -224,8 +229,11 @@ commander
             .then(() => {
                 log('# 处理 React 发布包...');
                 const reactClientBuildDir = path.resolve(PROJ_ROOT, 'react/build');
+                const reactServerBuildDir = path.resolve(PROJ_ROOT, 'react/build-server');
                 fs.emptyDirSync(reactClientBuildDir);
+                fs.emptyDirSync(reactServerBuildDir);
                 fs.copySync(path.resolve(RELEASE_DIR, 'react/client'), reactClientBuildDir);
+                fs.copySync(path.resolve(RELEASE_DIR, 'react/server'), reactServerBuildDir);
             })
 
             .catch(onMainCommandFailure);
@@ -237,15 +245,15 @@ commander
     .action(function () {
         return Promise.resolve()
             .then(checkConfigFile)
-            .then(function () {
-                log('# 编译 Demo 工程...');
-                chdir(path.resolve(PROJ_ROOT, 'demo'));
-                return Promise.resolve()
-                    .then(() => {
-                        log('  - 安装npm包...');
-                        return execAsync('yarn');
-                    });
-            })
+            // .then(function () {
+            //     log('# 编译 Demo 工程...');
+            //     chdir(path.resolve(PROJ_ROOT, 'demo'));
+            //     return Promise.resolve()
+            //         .then(() => {
+            //             log('  - 安装npm包...');
+            //             return execAsync('yarn');
+            //         });
+            // })
             .then(function () {
                 log('# 编译 Hexo Blog 工程...');
                 chdir(path.resolve(PROJ_ROOT, 'blog-v2'));
@@ -319,10 +327,10 @@ commander
                         log('  - 启动 nginx 服务器...');
                         return execAsync('service', ['nginx', 'start']);
                     })
-                    .then(function () {
-                        log('  - 启动 pm2 - demo 服务器...');
-                        return startPm2Server('demo', path.resolve(PROJ_ROOT, 'demo/server.js'));
-                    })
+                    // .then(function () {
+                    //     log('  - 启动 pm2 - demo 服务器...');
+                    //     return startPm2Server('demo', path.resolve(PROJ_ROOT, 'demo/server.js'));
+                    // })
                     .then(function () {
                         log('  - 启动 pm2 - react 服务器...');
                         chdir(PROJ_ROOT + '/react');
@@ -363,15 +371,15 @@ commander
                 log('  - 停止 nginx 服务器...');
                 return execAsync('service', ['nginx', 'stop']);
             })
+            // .then(function () {
+            //     log('  - 停止 pm2 (demo, react, meteor killers game) 服务器进程...');
+            //     return execAsync(PROJ_ROOT + '/node_modules/.bin/pm2', ['kill']);
+            // })
             .then(function () {
-                log('  - 停止 pm2 (demo, react, meteor killers game) 服务器进程...');
-                return execAsync(PROJ_ROOT + '/node_modules/.bin/pm2', ['kill']);
+               log('  - 停止 react 服务器...');
+               chdir(PROJ_ROOT + '/react');
+               return execAsync('yarn', ['gulp', 'stop-server']);
             })
-            //.then(function () {
-            //    log('  - 停止 react 服务器...');
-            //    chdir(PROJ_ROOT + '/react');
-            //    return execAsync('yarn', ['gulp', 'stop-server']);
-            //})
             .then(function () {
                 log('  - 停止 django uwsgi...');
                 return Promise.resolve().then(function () {

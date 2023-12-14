@@ -1,9 +1,8 @@
 {
   "private": true,
   "scripts": {
-    "build": "rimraf build && DEV=false webpack",
-    "build-dev": "DEV=true webpack -w -d",
-    "postinstall": "typings install"
+    "build": "rimraf build && cross-env DEV=false webpack",
+    "build-dev": "cross-env DEV=true webpack -w -d"
   },
   "dependencies": {
     "awesome-letter-animation": "github:adventure-yunfei/awesome-letter-animation#release-yf",
@@ -13,6 +12,8 @@
     "zepto": "^1.2.0"
   },
   "devDependencies": {
+    "@types/zepto": "^1.0.36",
+    "cross-env": "^7.0.3",
     "css-loader": "0.25.0",
     "d3": "4.2.7",
     "extract-text-webpack-plugin": "1.0.1",
@@ -25,7 +26,6 @@
     "style-loader": "0.13.1",
     "ts-loader": "0.9.0",
     "typescript": "2.0.3",
-    "typings": "1.4.0",
     "url-loader": "0.5.7",
     "webpack": "1.13.2",
     "webpack-core": "0.6.0"

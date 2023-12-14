@@ -1,3 +1,5 @@
+/// <reference types="zepto" />
+
 declare var require: Function;
 declare var globalMenu: any;
 
@@ -31,7 +33,7 @@ $(() => {
 
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.classList.add('logo-animator');
-    document.body.appendChild(svg);    
+    document.body.appendChild(svg);
 
     adjustSvgSize();
     window.onresize = adjustSvgSize;

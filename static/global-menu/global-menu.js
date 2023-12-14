@@ -34,7 +34,7 @@
             }]
         }, {
             text: '博客',
-            href: '//' + hosts.gitblog.by_domain,
+            href: '//' + hosts.hexoblog.by_domain,
         }, {
             text: 'Github',
             href: 'https://github.com/adventure-yunfei',

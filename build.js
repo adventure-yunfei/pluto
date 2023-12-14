@@ -376,14 +376,9 @@ commander
                 log('  - 停止 nginx 服务器...');
                 return execAsync('service', ['nginx', 'stop']);
             })
-            // .then(function () {
-            //     log('  - 停止 pm2 (demo, react, meteor killers game) 服务器进程...');
-            //     return execAsync(PROJ_ROOT + '/node_modules/.bin/pm2', ['kill']);
-            // })
             .then(function () {
-               log('  - 停止 react 服务器...');
-               chdir(PROJ_ROOT + '/react');
-               return execAsync('yarn', ['gulp', 'stop-server']);
+                log('  - 停止 pm2 (demo, react, meteor killers game, github-hooks 等) 服务器进程...');
+                return execAsync(PROJ_ROOT + '/node_modules/.bin/pm2', ['kill']);
             })
             .then(function () {
                 log('  - 停止 django uwsgi...');

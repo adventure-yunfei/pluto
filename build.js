@@ -283,6 +283,11 @@ commander
                 chdir(PROJ_ROOT + '/django');
                 return execAsync('python', ['build.py']);
             })
+            // .then(function () {
+            //     log('# 编译 Github Hooks 工程...');
+            //     chdir(PROJ_ROOT + '/github-hooks');
+            //     return execAsync('yarn');
+            // })
             .then(function () {
                 log('# 编译 typescript-entrance 工程...');
                 chdir(PROJ_ROOT + '/typescript-entrance');
@@ -341,11 +346,11 @@ commander
                         chdir(RELEASE_DIR + '/meteor-killers-game/bundle');
                         return execAsync(PROJ_ROOT + '/node_modules/.bin/pm2', ['start', 'pm2-process.json']);
                     })
-                    .then(() => {
-                        log('  - 启动 pm2 - Github Hooks 服务器...');
-                        chdir(PROJ_ROOT);
-                        return execAsync('yarn', ['pm2', 'start', 'github-hooks/server.js', '--name', 'github-hooks']);
-                    })
+                    // .then(() => {
+                    //     log('  - 启动 pm2 - Github Hooks 服务器...');
+                    //     chdir(PROJ_ROOT);
+                    //     return execAsync('yarn', ['pm2', 'start', 'github-hooks/server.js', '--name', 'github-hooks']);
+                    // })
                     .then(function () {
                         log('  - 启动 django uwsgi...');
                         chdir(PROJ_ROOT + '/django');

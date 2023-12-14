@@ -5,6 +5,7 @@ var pm2 = require('pm2'),
     _ = require('underscore'),
     handlebars = require('handlebars'),
     nodeExecCmd = require('node-exec-cmd'),
+    child_process = require('child_process'),
     config = require('./config.json');
 
 handlebars.registerHelper('equal', function (a, b, options) {
@@ -54,6 +55,9 @@ function execAsync(cmd, args, options) {
         logDetail: !!options && !!options.showDetailLog,
         bg: !!options && !!options.runOnBackground
     });
+}
+function execSyncWithoutLog(cmd, args = []) {
+    child_process.execSync(cmd + ' ' + args.join(' '), { stdio: 'ignore' });
 }
 
 function renderTemplateFile(filepath, outputPath, context) {
@@ -164,10 +168,10 @@ commander
             //     chdir(PROJ_ROOT + '/meteor-killers-game');
             //     return Promise.resolve().then(function () {
             //         log('  - 安装npm包...');
-            //         return execAsync('yarn');
+            //         return execSyncWithoutLog('yarn');
             //     }).then(function () {
             //         log('  - 编译meteor压缩包...');
-            //         return execAsync('meteor', ['build', RELEASE_DIR + '/meteor-killers-game', '--architecture', 'os.linux.x86_64']);
+            //         return execSyncWithoutLog('meteor', ['build', RELEASE_DIR + '/meteor-killers-game', '--architecture', 'os.linux.x86_64']);
             //     });
             // })
             .then(() => {
@@ -175,17 +179,15 @@ commander
                 chdir(PROJ_ROOT + '/react');
                 return Promise.resolve().then(function () {
                     log('  - 安装npm包...');
-                    return execAsync('yarn');
+                    return execSyncWithoutLog('yarn');
                 }).then(function () {
                     log('  - 编译 react client...');
-                    return execAsync('yarn', ['gulp', 'build', '-p']).then(() => {
-                        return fs.copy(path.resolve(PROJ_ROOT, 'react/build'), path.resolve(RELEASE_DIR, 'react/client'));
-                    });
+                    execSyncWithoutLog('yarn', ['gulp', 'build', '-p']);
+                    fs.copySync(path.resolve(PROJ_ROOT, 'react/build'), path.resolve(RELEASE_DIR, 'react/client'));
                 }).then(function () {
                     log('  - 编译 react server...');
-                    return execAsync('yarn', ['gulp', 'build-server']).then(() => {
-                        return fs.copy(path.resolve(PROJ_ROOT, 'react/build-server'), path.resolve(RELEASE_DIR, 'react/server'));
-                    });
+                    execSyncWithoutLog('yarn', ['gulp', 'build-server']);
+                    fs.copySync(path.resolve(PROJ_ROOT, 'react/build-server'), path.resolve(RELEASE_DIR, 'react/server'));
                 });
             })
 
@@ -194,12 +196,11 @@ commander
                 chdir(PROJ_ROOT + '/typescript-entrance');
                 return Promise.resolve().then(function () {
                     log('  - 安装npm包...');
-                    return execAsync('yarn');
+                    return execSyncWithoutLog('yarn');
                 }).then(function () {
                     log('  - 编译...');
-                    return execAsync('yarn', ['build']).then(() => {
-                        return fs.copy(path.resolve(PROJ_ROOT, 'typescript-entrance/build'), path.resolve(RELEASE_DIR, 'typescript-entrance'));
-                    });
+                    execSyncWithoutLog('yarn', ['build']);
+                    fs.copySync(path.resolve(PROJ_ROOT, 'typescript-entrance/build'), path.resolve(RELEASE_DIR, 'typescript-entrance'));
                 });
             })
 
@@ -218,11 +219,11 @@ commander
             //     return Promise.resolve().then(function () {
             //         log('  - 解压meteor压缩包...');
             //         fs.removeSync('bundle');
-            //         return execAsync('tar', ['-xf', 'meteor-killers-game.tar.gz']);
+            //         return execSyncWithoutLog('tar', ['-xf', 'meteor-killers-game.tar.gz']);
             //     }).then(function () {
             //         log('  - 安装meteor服务端依赖的npm包...');
             //         chdir('bundle/programs/server');
-            //         return execAsync('yarn');
+            //         return execSyncWithoutLog('yarn');
             //     }).then(function () {
             //         log('  - 准备pm2启动配置文件...');
             //         chdir('../..');
@@ -252,7 +253,7 @@ commander
                 fs.copySync(path.resolve(RELEASE_DIR, 'react/client'), clientBuildDir);
                 fs.copySync(path.resolve(RELEASE_DIR, 'react/server'), serverBuildDir);
                 log('  - 安装 React 服务端依赖的npm包...');
-                return execAsync('yarn', ['--prod']);
+                return execSyncWithoutLog('yarn', ['--prod']);
             })
 
             .then(() => {
@@ -277,7 +278,7 @@ commander
             //     return Promise.resolve()
             //         .then(() => {
             //             log('  - 安装npm包...');
-            //             return execAsync('yarn');
+            //             return execSyncWithoutLog('yarn');
             //         });
             // })
             .then(function () {
@@ -286,11 +287,11 @@ commander
                 return Promise.resolve()
                     .then(() => {
                         log('  - 安装npm包...');
-                        return execAsync('yarn');
+                        return execSyncWithoutLog('yarn');
                     })
                     .then(() => {
                         log('  - 生成静态网站...');
-                        return execAsync('yarn', ['generate']);
+                        return execSyncWithoutLog('yarn', ['generate']);
                     });
             })
             .then(function () {
@@ -298,21 +299,21 @@ commander
                 chdir(PROJ_ROOT + '/static');
                 return Promise.resolve().then(function () {
                     log('  - 安装npm包...');
-                    return execAsync('yarn');
+                    return execSyncWithoutLog('yarn');
                 }).then(function () {
                     log('  - 编译文件...');
-                    return execAsync('yarn', ['gulp']);
+                    return execSyncWithoutLog('yarn', ['gulp']);
                 });
             })
             .then(function () {
                 log('# 编译 Django 工程...');
                 chdir(PROJ_ROOT + '/django');
-                return execAsync('python', ['build.py']);
+                return execSyncWithoutLog('python', ['build.py']);
             })
             // .then(function () {
             //     log('# 编译 Github Hooks 工程...');
             //     chdir(PROJ_ROOT + '/github-hooks');
-            //     return execAsync('yarn');
+            //     return execSyncWithoutLog('yarn');
             // })
 
             .catch(onMainCommandFailure);
@@ -328,14 +329,14 @@ commander
             .then(function () {
                 log('# 启动服务前, 首先请确保 nginx(apache) 配置文件已设置.\n');
                 log('# 启动服务器前首先关闭服务器:');
-                return execAsync('node', ['build.js', 'stop-server'], {showDetailLog: true});
+                child_process.execSync('node build.js stop-server', {stdio: 'inherit'});
             })
             .then(function () {
                 log('# 启动服务器...');
                 return Promise.resolve()
                     .then(function () {
                         log('  - 启动 nginx 服务器...');
-                        return execAsync('service', ['nginx', 'start']);
+                        return execSyncWithoutLog('service', ['nginx', 'start']);
                     })
                     // .then(function () {
                     //     log('  - 启动 pm2 - demo 服务器...');
@@ -344,17 +345,17 @@ commander
                     .then(function () {
                         log('  - 启动 pm2 - react 服务器...');
                         chdir(PROJ_ROOT + '/react/build-server');
-                        return execAsync(PROJ_ROOT + '/node_modules/.bin/pm2', ['start', 'pm2-process.json']);
+                        return execSyncWithoutLog(PROJ_ROOT + '/node_modules/.bin/pm2', ['start', 'pm2-process.json']);
                     })
                     // .then(function () {
                     //     log('  - 启动 pm2 - meteor killers game 服务器...');
                     //     chdir(RELEASE_DIR + '/meteor-killers-game/bundle');
-                    //     return execAsync(PROJ_ROOT + '/node_modules/.bin/pm2', ['start', 'pm2-process.json']);
+                    //     return execSyncWithoutLog(PROJ_ROOT + '/node_modules/.bin/pm2', ['start', 'pm2-process.json']);
                     // })
                     // .then(() => {
                     //     log('  - 启动 pm2 - Github Hooks 服务器...');
                     //     chdir(PROJ_ROOT);
-                    //     return execAsync('yarn', ['pm2', 'start', 'github-hooks/server.js', '--name', 'github-hooks']);
+                    //     return execSyncWithoutLog('yarn', ['pm2', 'start', 'github-hooks/server.js', '--name', 'github-hooks']);
                     // })
                     .then(function () {
                         log('  - 启动 django uwsgi...');
@@ -375,22 +376,24 @@ commander
         return Promise.resolve()
             // .then(function () {
             //     log('  - 停止 apache2 服务器...');
-            //     return execAsync('service', ['apache2', 'stop']);
+            //     return execSyncWithoutLog('service', ['apache2', 'stop']);
             // })
             .then(function () {
                 log('  - 停止 nginx 服务器...');
-                return execAsync('service', ['nginx', 'stop']);
+                return execSyncWithoutLog('service', ['nginx', 'stop']);
             })
             .then(function () {
                 log('  - 停止 pm2 (demo, react, meteor killers game, github-hooks 等) 服务器进程...');
-                return execAsync(PROJ_ROOT + '/node_modules/.bin/pm2', ['kill']);
+                return execSyncWithoutLog(PROJ_ROOT + '/node_modules/.bin/pm2', ['kill']);
             })
             .then(function () {
                 log('  - 停止 django uwsgi...');
                 return Promise.resolve().then(function () {
                     fs.accessSync(uwsgi_pid_file);
                 }).then(function () {
-                    return execAsync('uwsgi', ['--stop', uwsgi_pid_file]).catch(() => {});
+                    try {
+                        execSyncWithoutLog('uwsgi', ['--stop', uwsgi_pid_file]);
+                    } catch (e) {}
                 }, function () {});
             })
             .catch(onMainCommandFailure);
@@ -482,14 +485,12 @@ commander
         return Promise.resolve()
             .then(function () {
                 log('  - 首先清除iptables OUTPUT规则...');
-                return execAsync('iptables', ['-F', 'OUTPUT']);
+                return execSyncWithoutLog('iptables', ['-F', 'OUTPUT']);
             })
             .then(function () {
                 log('  - 设置流量配额规则...');
-                return execAsync('iptables', ('-A OUTPUT -p tcp -m quota --quota ' + Quota + ' -j ACCEPT').split(/\s+/))
-                    .then(function () {
-                        return execAsync('iptables', '-A OUTPUT -p tcp -j DROP'.split(/\s+/));
-                    });
+                execSyncWithoutLog('iptables', ('-A OUTPUT -p tcp -m quota --quota ' + Quota + ' -j ACCEPT').split(/\s+/));
+                execSyncWithoutLog('iptables', '-A OUTPUT -p tcp -j DROP'.split(/\s+/));
             })
             .catch(onMainCommandFailure);
     });

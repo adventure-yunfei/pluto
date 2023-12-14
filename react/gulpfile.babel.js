@@ -5,11 +5,12 @@ import babel from 'gulp-babel';
 import webpack from 'webpack';
 import yargs from 'yargs';
 import rimraf from 'rimraf';
-import pm2 from 'pm2';
+import fse from 'fs-extra';
 import taskList from 'gulp-task-listing';
+import * as path from 'path';
 
 import makeWebpackConfig from './makeWebpackConfig';
-import {BUILD_DIR, BUILD_SERVER_DIR} from './constants';
+import {BUILD_DIR, BUILD_SERVER_DIR, ROOT} from './constants';
 
 const args = yargs
     .alias('p', 'production')
@@ -30,13 +31,6 @@ gulp.task('env', (done) => {
 gulp.task('clean', (done) => {
     rimraf.sync(`${BUILD_DIR}/*`);
     done();
-});
-
-gulp.task('build-server', () => {
-    rimraf.sync(`${BUILD_SERVER_DIR}/*`);
-    return gulp.src(['./app/server/**/*.js', './app/lib/**/*.js', '!node_modules/**'], { base: '.' })
-        .pipe(babel())
-        .pipe(gulp.dest(BUILD_SERVER_DIR));
 });
 
 gulp.task('build', gulp.series(['clean'], (done) => {
@@ -75,43 +69,29 @@ gulp.task('build', gulp.series(['clean'], (done) => {
     });
 }));
 
-const ServerScript = 'build-server/app/server/index.js';
-const ServerPM2Name = 'pluto';
 gulp.task('server', gulp.series(['env'], function (done) {
-    // if (isDev) {
-    //     bg('node', 'app/server/index.js')();
-    // } else {
-    pm2.connect(err => {
-        if (err) {
-            gulpUtil.log('[pm2]', 'start pm2 failed:');
-            gulpUtil.log('[pm2]', err);
-            done();
-        } else {
-            pm2.start({
-                script: ServerScript,
-                name: ServerPM2Name
-            }, () => {
-                pm2.disconnect();
-                done();
-            });
-        }
-    });
-    // }
+    if (isDev) {
+        bg('node', 'app/server/index.js')();
+    } else {
+        throw new Error(`This gulp task is only for DEV server`);
+    }
 }));
-gulp.task('stop-server', done => {
-    pm2.connect(err => {
-        if (err) {
-            gulpUtil.log('[pm2]', 'start pm2 failed:');
-            gulpUtil.log('[pm2]', err);
-            done();
-        } else {
-            pm2.stop(ServerPM2Name, () => {
-                pm2.disconnect();
-                done();
-            });
-        }
+
+gulp.task('build-server', gulp.series([() => {
+    fse.emptyDirSync(BUILD_SERVER_DIR);
+    fse.outputJsonSync(path.resolve(BUILD_SERVER_DIR, 'pm2-process.json'), {
+        apps: [{
+            name: 'photo',
+            script: 'server/index.js',
+        }]
     });
-});
+    return gulp.src(['./app/**', '!app/**/*.js'], { base: './app' })
+        .pipe(gulp.dest(BUILD_SERVER_DIR));
+}, () => {
+    return gulp.src(['./app/**/*.js'], { base: './app' })
+        .pipe(babel())
+        .pipe(gulp.dest(BUILD_SERVER_DIR));
+}]));
 
 gulp.task('help', taskList.withFilters(/None/, /env/));
 

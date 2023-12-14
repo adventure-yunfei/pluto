@@ -1,14 +1,11 @@
 import express from 'express';
 import request from 'request';
-import webpack from 'webpack';
-import webpackDevMiddleware from 'webpack-dev-middleware';
-// import webapckHotMiddleware from 'webpack-hot-middleware';
 import compression from 'compression';
+import path from 'path';
 
 import '../lib/polyfill';
 
 import render from './render';
-import makeWebpackConfig from '../../makeWebpackConfig';
 import config from './config';
 
 function createProxy(toUrl, {nocache = false}) {
@@ -43,6 +40,9 @@ app.use(compression());
 // config webpack for hot reloading
 // Since EventSource is not supported in IE, debugging on IE is not supported.
 if (__DEV__) {
+    const webpack = require('webpack');
+    const webpackDevMiddleware = require('webpack-dev-middleware');
+    const makeWebpackConfig = require('../../makeWebpackConfig').default;
     const webpackConfig = makeWebpackConfig(true, true);
     const compiler = webpack(webpackConfig);
     app.use(webpackDevMiddleware(compiler, {
@@ -55,8 +55,8 @@ if (__DEV__) {
 
 app.use('/api', createProxy(config.apiServer, {nocache: true}));
 
-app.use('/build', express.static('build'));
-app.use('/static', express.static('static'));
+app.use('/build', express.static(path.resolve(__dirname, '../../build')));
+app.use('/static', express.static(path.resolve(__dirname, '../../static')));
 app.use('/game2048', (req, res, next) => render(req, res, next, {checkLogin: false}));
 app.get('*', render);
 

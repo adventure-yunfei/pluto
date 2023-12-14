@@ -187,7 +187,23 @@ commander
                         return fs.copy(path.resolve(PROJ_ROOT, 'react/build-server'), path.resolve(RELEASE_DIR, 'react/server'));
                     });
                 });
-            });
+            })
+
+            .then(() => {
+                log('# 编译 Typescript Entrance 发布包...');
+                chdir(PROJ_ROOT + '/typescript-entrance');
+                return Promise.resolve().then(function () {
+                    log('  - 安装npm包...');
+                    return execAsync('yarn');
+                }).then(function () {
+                    log('  - 编译...');
+                    return execAsync('yarn', ['build']).then(() => {
+                        return fs.copy(path.resolve(PROJ_ROOT, 'typescript-entrance/build'), path.resolve(RELEASE_DIR, 'typescript-entrance'));
+                    });
+                });
+            })
+
+            .catch(onMainCommandFailure);;
     });
 
 commander
@@ -237,6 +253,13 @@ commander
                 fs.copySync(path.resolve(RELEASE_DIR, 'react/server'), serverBuildDir);
                 log('  - 安装 React 服务端依赖的npm包...');
                 return execAsync('yarn', ['--prod']);
+            })
+
+            .then(() => {
+                log('# 处理 Typescript Entrance 发布包...');
+                log('  - 复制到 root-domain-pages 资源...');
+                fs.removeSync(path.resolve(PROJ_ROOT, 'root-domain-pages/ts-entry-static'));
+                fs.copySync(path.resolve(RELEASE_DIR, 'typescript-entrance'), path.resolve(PROJ_ROOT, 'root-domain-pages'));
             })
 
             .catch(onMainCommandFailure);
@@ -291,23 +314,6 @@ commander
             //     chdir(PROJ_ROOT + '/github-hooks');
             //     return execAsync('yarn');
             // })
-            .then(function () {
-                log('# 编译 typescript-entrance 工程...');
-                chdir(PROJ_ROOT + '/typescript-entrance');
-                return Promise.resolve().then(function () {
-                    log('  - 安装npm包...');
-                    return execAsync('yarn');
-                }).then(function () {
-                    log('  - 编译文件...');
-                    return execAsync('yarn', ['build']);
-                });
-            })
-            .then(function () {
-                log('# 准备 root-domain-pages 资源...');
-                chdir(PROJ_ROOT);
-                fs.removeSync('root-domain-pages/ts-entry-static');
-                fs.copySync('typescript-entrance/build', 'root-domain-pages');
-            })
 
             .catch(onMainCommandFailure);
     });
